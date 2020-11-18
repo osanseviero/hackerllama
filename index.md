@@ -1,13 +1,12 @@
 ## Hello!
 
-My name is Omar! I'm a software engineer that works in ML models and infrastructure that power multiple features in Google Assistant. I'm also a 20% Product Manager in the awesome [TensorFlow Graphics](https://github.com/tensorflow/graphics) team.
+My name is Omar! I'm a software engineer that works in ML models and infrastructure that power multiple features in Google Assistant. I'm also a 20% Product Manager in the [TensorFlow Graphics](https://github.com/tensorflow/graphics) team.
 
-I've always loved to share my knowledge with other, so I try to give talks whenever possible. This also led me to create [AI Learners](https://www.meetup.com/AI-Learners/), a non-profit community in which we offered talks and workshops on topics such as Machine Learning, Deep Learning, Natural Language Processing and Computer Vision for people of all levels of knowledge.
-
+I've always loved to share my knowledge with others, so I try to give talks whenever possible. This also led me to create [AI Learners](https://www.meetup.com/AI-Learners/), a non-profit community in which we offered talks and workshops on topics such as Machine Learning, Deep Learning, Natural Language Processing and Computer Vision for people of all levels of knowledge.
 
 ### Location
 
-I'm currently located in Zürich, but I've also lived in Mexico 🇲🇽 for 12 years, Peru 🇵🇪 other 9 years, and Panama 🇵🇦. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
+I'm currently located in Zürich, but I've lived in Mexico 🇲🇽 for 12 years, Peru 🇵🇪 other 9 years, and Panama 🇵🇦. I also had the great opportunity of doing internships in Seattle and Mountain View. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
 
 ### Workshops
 
@@ -43,3 +42,5 @@ I'm currently located in Zürich, but I've also lived in Mexico 🇲🇽 for 12 
 * Mentor in BBVA Hack (Mexico City, 2018)
 * Mentor in SF Hacks (San Francisco, 2018)
 * Mentor in DubHacks (Seattle, 2017)
+
+Feel free to connect with me in [LinkedIn](https://www.linkedin.com/in/omarsanseviero/)!
