@@ -1,37 +1,45 @@
-## Welcome to GitHub Pages
+## Hello!
 
-You can use the [editor on GitHub](https://github.com/osanseviero/hackerllama/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+My name is Omar! I'm a software engineer that works in ML models and infrastructure that power multiple features in Google Assistant. I'm also a 20% Product Manager in the awesome [TensorFlow Graphics](https://github.com/tensorflow/graphics) team.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+I've always loved to share my knowledge with other, so I try to give talks whenever possible. This also led me to create [AI Learners](https://www.meetup.com/AI-Learners/), a non-profit community in which we offered talks and workshops on topics such as Machine Learning, Deep Learning, Natural Language Processing and Computer Vision for people of all levels of knowledge.
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Location
 
-```markdown
-Syntax highlighted code block
+I'm currently located in Zürich, but I've also lived in Mexico 🇲🇽 for 12 years, Peru 🇵🇪 other 9 years, and Panama 🇵🇦. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
 
-# Header 1
-## Header 2
-### Header 3
+### Workshops
 
-- Bulleted
-- List
+* Differentiable 3D Graphics (online, [RIIAA](https://riiaa.org/en), August 2020).
+* ML in production two days workshop. (Madrid, 2019, organized by EOI Business School, [presentation](https://github.com/TheHackerLlama/ml_en_produccion/blob/master/End%20to%20End%20Machine%20Learning.pdf)).
+* Introduction to Machine Learning and the regulation efforts (Bogota, 2019, UN Women Colombia).
+* End to end Machine Learning (Lima, co-organized with Data Science Research Peru, 2019).
+* World Models (Lima, co-organized with Data Science Research Peru, 2019).
+* Introduction to TensorFlow (webinar, 2019, [recording](https://www.youtube.com/watch?v=muHlVLV6Ub8)).
+* Generative Adversarial Networks (Mexico City, AI Learners, 2018, [recording](https://www.youtube.com/watch?v=IRasZVkVP7k)).
+* Neural Network Types (Mexico City, AI Learners, 2018, [recording](https://www.youtube.com/watch?v=tSjciY0KNdw&t=4s&ab_channel=AILEARNERS)).
+* Introduction to Deep Learning (Mexico City, MVS radio, 2018).
+* Deep Learning in a real setting (Mexico City, MVS radio, 2018).
+* World Models, can a program learn from its dreams? (Mexico City, AI Learners, 2018, [recording](https://www.youtube.com/watch?v=oVvPHZC6pfM)).
+* Introduction to Deep Learning and Neural Networks (Mexico City, AI Learners, 2018).
+* Introduction to Deep Learning (Mexico City, HackRobots, December 2017).
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
+### Courses
 
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/osanseviero/hackerllama/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+* Machine Learning for economists (Mexico City, 2018)
+  * Taught a small group economist Machine Learning basics and how to apply it for practical economy problem.
+  * **Topics:** Machine Learning, linear regression, classification, regularization, how to evaluate learning algorithms, deep learning, clustering, reinforcement learning, and recurrent neural networks.
+* Practical Deep Learning (Mexico City, 2018)
+  * Gave a three months course at the ITESM (Tecnológico de Monterrey) to CS students about practical Deep Learning.
+  * **Topics:** Introduction to Deep Learning, backpropagation, convolutional neural networks, recurrent neural networks, LSTMs, embeddings and word2vec, Reinforcement Learning, world models, and an introduction to TensorFlow.
+* Immersive Web Development (Mexico City, 2017)
+  * Throughout two semesters, I taught an introduction to web development course to CS students.
+  * **Topics:** HTML5 & CSS3, designing their own framework, bootstrap and polymer, JavaScript, JQuery, APIs, Node, Selenium, and front end optimization.
+ 
+### Mentoring
+* Mentor Google Launchpad (Mexico City, 2018)
+* Mentor in BBVA Hack (Mexico City, 2018)
+* Mentor in SF Hacks (San Francisco, 2018)
+* Mentor in DubHacks (Seattle, 2017)
