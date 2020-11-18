@@ -43,4 +43,4 @@ I'm currently located in Zürich, but I've lived in Mexico 🇲🇽 for 12 years
 * Mentor in SF Hacks (San Francisco, 2018)
 * Mentor in DubHacks (Seattle, 2017)
 
-Feel free to connect with me in [LinkedIn](https://www.linkedin.com/in/omarsanseviero/)!
+Feel free to connect with me in [LinkedIn](https://www.linkedin.com/in/omarsanseviero/) or follow me in [Twitter](https://twitter.com/osanseviero).
