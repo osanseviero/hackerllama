@@ -11,6 +11,7 @@ I'm currently located in Zürich, but I've lived in Mexico 🇲🇽 for 12 years
 ### Workshops
 
 * Differentiable 3D Graphics (online, [RIIAA](https://riiaa.org/en), August 2020).
+* Conversation about AI (online, [ELIA](https://www.meetup.com/es-ES/ai_hub/events/271683384/) - Latin American AI School, July 2020)
 * ML in production two days workshop. (Madrid, 2019, organized by EOI Business School, [presentation](https://github.com/TheHackerLlama/ml_en_produccion/blob/master/End%20to%20End%20Machine%20Learning.pdf)).
 * Introduction to Machine Learning and the regulation efforts (Bogota, 2019, UN Women Colombia).
 * End to end Machine Learning (Lima, co-organized with Data Science Research Peru, 2019).
