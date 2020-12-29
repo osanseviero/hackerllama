@@ -8,7 +8,7 @@ I've always loved to share my knowledge with others, so I try to give talks when
 
 I'm currently located in Zürich, but I've lived in Mexico 🇲🇽 for 12 years, Peru 🇵🇪 other 9 years, and Panama 🇵🇦. I also had the great opportunity of doing internships in Seattle and Mountain View. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
 
-### Workshops
+### Workshops (many in Spanish)
 
 * Differentiable 3D Graphics (online, [RIIAA](https://riiaa.org/en), August 2020).
 * Conversation about AI (online, [ELIA](https://www.meetup.com/es-ES/ai_hub/events/271683384/) - Latin American AI School, July 2020)
@@ -29,7 +29,7 @@ I'm currently located in Zürich, but I've lived in Mexico 🇲🇽 for 12 years
 ### Courses
 
 * Machine Learning for economists (Mexico City, 2018)
-  * Taught a small group economist Machine Learning basics and how to apply it for practical economy problem.
+  * Taught a small group of economists Machine Learning basics and how to apply it for practical economy problem.
   * **Topics:** Machine Learning, linear regression, classification, regularization, how to evaluate learning algorithms, deep learning, clustering, reinforcement learning, and recurrent neural networks.
 * Practical Deep Learning (Mexico City, 2018)
   * Gave a three months course at the ITESM (Tecnológico de Monterrey) to CS students about practical Deep Learning.
