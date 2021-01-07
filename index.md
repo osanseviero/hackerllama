@@ -1,6 +1,6 @@
 ## Hello!
 
-My name is Omar! I'm a software engineer that works in ML models and infrastructure that power multiple features in Google Assistant. I'm also a 20% Product Manager in the [TensorFlow Graphics](https://github.com/tensorflow/graphics) team.
+My name is Omar! I'm a software engineer working in ML models and infrastructure that power multiple features in Google Assistant. I'm also a 20% Product Manager in the [TensorFlow Graphics](https://github.com/tensorflow/graphics) team.
 
 I've always loved to share my knowledge with others, so I try to give talks whenever possible. This also led me to create [AI Learners](https://www.meetup.com/AI-Learners/), a non-profit community in which we offered talks and workshops on topics such as Machine Learning, Deep Learning, Natural Language Processing and Computer Vision for people of all levels of knowledge.
 
