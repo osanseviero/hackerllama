@@ -6,7 +6,7 @@
 * [Non-Traditional](#non-traditional)
 
 
-### Bachellor
+### Bachellor
 
 I studied Computer Science at Tecnológico de Monterrey, one of the top Mexican engineering university, in Mexico City. I graduated at the top 5% of my class with a final grade of 94 over 100.
 
