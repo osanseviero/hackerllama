@@ -7,8 +7,11 @@ I've always loved to share my knowledge with others, so I try to give talks when
 ### Location
 
 🇨🇭 Currently located in Zurich.
+
 🇲🇽 Lived in Mexico for 12 years.
+
 🇵🇪 Lived in Peru for 9 years.
+
 🇵🇦 Lived in Panama for 2 years.
 
 I also had the great opportunity of doing internships in Seattle and Mountain View. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
