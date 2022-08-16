@@ -15,23 +15,21 @@ format:
     toc-depth: 4
 
 website:
-  title: "nbdev_hello_world"
-  site-url: "https://fastai.github.io/nbdev_hello_world/"
+  title: "nbdev-hello-world"
+  site-url: "https://fastai.github.io/nbdev-hello-world"
   description: "Hello world from nbdev"
-  execute: 
-    enabled: false
   twitter-card: true
   open-graph: true
   reader-mode: true
   repo-branch: master
-  repo-url: "https://github.com/fastai/nbdev-hello-world/"
+  repo-url: "https://github.com/fastai/nbdev-hello-world"
   repo-actions: [issue]
   navbar:
     background: primary
     search: true
     right:
       - icon: github
-        href: "https://github.com/fastai/nbdev-hello-world/"
+        href: "https://github.com/fastai/nbdev-hello-world"
   sidebar:
     style: "floating"
 
