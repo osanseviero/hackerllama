@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "nbdev-hello-world"
+  site-url: "https://fastai.github.io/nbdev-hello-world"
+  description: "Hello world from nbdev"
+  repo-branch: master
+  repo-url: "https://github.com/fastai/nbdev-hello-world"
