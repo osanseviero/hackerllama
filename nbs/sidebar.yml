@@ -1,0 +1,13 @@
+website:
+  sidebar:
+    contents:
+      - index.qmd
+      - resources.qmd
+      - section: blog
+        contents:
+          - section: posts
+            contents:
+              - section: gpu-poor-strike-back
+                contents: []
+                href: blog/posts/gpu-poor-strike-back/index.qmd
+        href: blog/index.qmd

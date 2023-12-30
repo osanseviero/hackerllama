@@ -1,0 +1,10 @@
+---
+title: Blog
+subtitle: This is my personal blog post
+listing:
+  sort: "date desc"
+  contents: "posts"
+  categories: false
+  feed: true
+page-layout: full
+---

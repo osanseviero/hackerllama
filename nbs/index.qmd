@@ -1,0 +1,41 @@
+---
+title: "Omar Sanseviero"
+toc: false
+# page-layout: full
+---
+
+**Hi there!** I'm Omar, the Chief Llama Officer at Hugging Face. 🦙
+
+I work at the intersection of Open Source, Product, Research, and technical communities, leading multidisciplinary teams and open source and science collaborations.
+
+Previously, I was a Software Engineer at Google building ML models and infrastructure that power multiple features in Google Assistant. I also had a short stint as a 20% Product Manager in the TensorFlow Graphics team. 
+
+In this website you can find my writings 🤗 Click "Blog" at the top navbar to see some new content! I write about Machine Learning and Open Source.
+
+
+![](profile.jpeg)
+
+### About my work at Hugging Face
+
+One of the funnest things about my role is that no day looks the same. One day might be a rush to get [Llama 2](https://huggingface.co/blog/llama2) ready for releasing, while another day might involve learning and writing about [Mixture of Experts](https://huggingface.co/blog/moe). Given my role, I get to work with a bunch of folks all across the company and ecosystem, from [research](https://scholar.google.com/citations?user=1CHq4KcAAAAJ&hl=en) to product.
+I try to do most of my work in the open, so you can check my social media accounts or GitHub to see some of my work. Some of the things I'm proud to have shipped:
+
+* We launched [Hugging Face Spaces](http://hf.co/spaces) at the end of 2022; it enables the community to build, share, and collaborate in ML demos. With consistent growth for 2 years, we went from 500 Spaces to over 400k demos built by the community!
+* Created and grew up the Developer Advocacy Engineering and Moonshot teams; the teams work in ML topics such as on-device, Audio, Healthcare, Artists Ecosystems, Reinforcement Learning, 3D Computer Vision, Gaming, and more!
+* Built key collaborations and partnerships with OS communities and libraries.
+* Implemented technical integrations with OS libraries such as [spaCy](https://huggingface.co/blog/spacy) and [Sentence Transformers](https://huggingface.co/blog/sentence-transformers-in-the-hub).
+
+
+### Location
+
+🇨🇭 Currently located in Zurich.
+
+🇲🇽 Lived in Mexico for 12 years.
+
+🇵🇪 Lived in Peru for 9 years.
+
+🇵🇦 Lived in Panama for 2 years.
+
+I also had the great opportunity of doing internships in Seattle and Mountain View. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
+
+Feel free to connect with me in [LinkedIn](https://www.linkedin.com/in/omarsanseviero/), follow me in [Twitter](https://twitter.com/osanseviero), or reach out to osanseviero at gmail.com.

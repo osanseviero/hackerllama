@@ -3,18 +3,36 @@ project:
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: flatly
+      dark: darkly
     css: styles.css
     toc: true
 
 website:
-  twitter-card: true
+  search: false
+  twitter-card:
+    creator: "@osanseviero"
   open-graph: true
   repo-actions: [issue]
+  google-analytics: "G-SF72633X8L"
   navbar:
     background: primary
-    search: true
-  sidebar:
-    style: floating
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Blog"
+        href: blog/index.qmd
+      - text: "Misc Resources"
+        href: resources.qmd
+    right:
+      - icon: twitter
+        href: https://twitter.com/osanseviero
+      - icon: linkedin
+        href: https://www.linkedin.com/in/omarsanseviero/
+      - icon: github
+        href: https://github.com/osanseviero
+      - icon: rss
+        href: blog/index.xml      
 
-metadata-files: [nbdev.yml, sidebar.yml]
+metadata-files: [nbdev.yml]
