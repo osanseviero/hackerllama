@@ -2,7 +2,7 @@
 date: "12/15/2023"
 toc: false
 description: "Does Open Source have a moat? This brief post discusses about OS communities and their strengths as well as collective collaborative ML in the ecosystem."
-image: https://substack-post-media.s3.amazonaws.com/public/images/d8f556b3-9cc0-481c-aaef-4f985c0ffb88_575x288.png
+image: team.png
 twitter-card: true
 ---
 
