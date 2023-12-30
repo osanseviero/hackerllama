@@ -10,6 +10,7 @@ format:
     toc: true
 
 website:
+  favicon: hacker.png
   search: false
   twitter-card:
     creator: "@osanseviero"
