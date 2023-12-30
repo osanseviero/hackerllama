@@ -1,7 +1,8 @@
 ---
 title: "Omar Sanseviero"
 toc: false
-# page-layout: full
+image: hacker.png
+# page-layout: full 
 ---
 
 **Hi there!** I'm Omar, the Chief Llama Officer at Hugging Face. 🦙
@@ -10,7 +11,7 @@ I work at the intersection of Open Source, Product, Research, and technical comm
 
 Previously, I was a Software Engineer at Google building ML models and infrastructure that power multiple features in Google Assistant. I also had a short stint as a 20% Product Manager in the TensorFlow Graphics team. 
 
-In this website you can find my writings 🤗 Click "Blog" at the top navbar to see some new content! I write about Machine Learning and Open Source.
+In this website, I write about Machine Learning and Open Source. 🤗 Check out the [Blog](/blog/) section!
 
 
 ![](profile.jpeg)
