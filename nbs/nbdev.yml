@@ -4,6 +4,6 @@ project:
 website:
   title: "hackerllama"
   site-url: "https://osanseviero.github.io/hackerllama"
-  description: "Hello world from nbdev"
-  repo-branch: gh-pages
+  description: "Omar Sanseviero Personal Website"
+  repo-branch: main
   repo-url: "https://github.com/osanseviero/hackerllama"

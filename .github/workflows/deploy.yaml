@@ -1,7 +1,7 @@
 name: Deploy to GitHub Pages
 on:
   push:
-    branches: [ "gh-pages"]
+    branches: [ "main"]
   workflow_dispatch:
 jobs:
   deploy:
