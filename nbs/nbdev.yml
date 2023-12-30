@@ -5,5 +5,5 @@ website:
   title: "hackerllama"
   site-url: "https://osanseviero.github.io/hackerllama"
   description: "Hello world from nbdev"
-  repo-branch: master
+  repo-branch: gh-pages
   repo-url: "https://github.com/osanseviero/hackerllama"
