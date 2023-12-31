@@ -20,7 +20,7 @@ website:
   navbar:
     background: primary
     left:
-      - text: "Home"
+      - text: "About"
         href: index.qmd
       - text: "Blog"
         href: blog/index.qmd

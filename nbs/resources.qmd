@@ -82,7 +82,7 @@ If you want to invite me to give a workshop/conference/talk, feel free to reach 
 * Enabled members from different teams to do impactful and exciting things, such as launching a [course with Andrew Ng](https://twitter.com/AndrewYNg/status/1684233418782179328).
 * Launching the HF Discord Server which has nicely grown over the years (you can join at [hf.co/join/discord(hf.co/join/discord)])
 * Collaborated with the Google Colab team for a couple of features, such as [notebooks on HF](https://twitter.com/GoogleColab/status/1637851385893998597)!
-* Going from 20k repos to over a million repositories on Hugging Face. We go brrr 🔥
+* Going from 20k repos to over a million repositories on Hugging Face. Repos go brrr 🔥
 * Launch of Spaces Docker templates (collaborated with [Docker](https://twitter.com/Docker/status/1640845221964525573), Argilla, [Elixir](https://twitter.com/livebookdev/status/1625872160441999361), LabelStudio, [AimStack](https://twitter.com/aimstackio/status/1648728969557028871?s=61&t=biYksbLBAYulzGaG_UUWvQ), [Shiny](https://twitter.com/posit_pbc/status/1655624912923672576), ZenML, Anaconda, and Giskard).
 
 
