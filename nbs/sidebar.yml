@@ -7,10 +7,10 @@ website:
         contents:
           - section: posts
             contents:
-              - section: random-transformer
-                contents: []
-                href: blog/posts/random-transformer/index.ipynb
               - section: gpu-poor-strike-back
                 contents: []
                 href: blog/posts/gpu-poor-strike-back/index.qmd
+              - section: random_transformer
+                contents: []
+                href: blog/posts/random_transformer/index.ipynb
         href: blog/index.qmd
