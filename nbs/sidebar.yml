@@ -7,6 +7,9 @@ website:
         contents:
           - section: posts
             contents:
+              - section: exemplified-transformer
+                contents: []
+                href: blog/posts/exemplified-transformer/index.ipynb
               - section: gpu-poor-strike-back
                 contents: []
                 href: blog/posts/gpu-poor-strike-back/index.qmd
