@@ -2,6 +2,7 @@ website:
   sidebar:
     contents:
       - index.qmd
+      - 00_core.ipynb
       - resources.qmd
       - section: blog
         contents:
@@ -13,4 +14,7 @@ website:
               - section: random_transformer
                 contents: []
                 href: blog/posts/random_transformer/index.ipynb
+              - section: sentence_embeddings
+                contents: []
+                href: blog/posts/sentence_embeddings/index.ipynb
         href: blog/index.qmd
