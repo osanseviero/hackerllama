@@ -11,6 +11,9 @@ website:
               - section: gpu-poor-strike-back
                 contents: []
                 href: blog/posts/gpu-poor-strike-back/index.qmd
+              - section: hitchhiker_guide
+                contents: []
+                href: blog/posts/hitchhiker_guide/index.qmd
               - section: random_transformer
                 contents: []
                 href: blog/posts/random_transformer/index.ipynb
