@@ -20,4 +20,7 @@ website:
               - section: sentence_embeddings
                 contents: []
                 href: blog/posts/sentence_embeddings/index.ipynb
+              - section: sentence_embeddings2
+                contents: []
+                href: blog/posts/sentence_embeddings2/index.ipynb
         href: blog/index.qmd
