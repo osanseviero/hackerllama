@@ -148,8 +148,15 @@ The previous metrics and factors were useful to pick a pre-trained model you mig
 
 * **AGIEval:** Benchmark of qualification exams for general knowledge. 
 
-
 When releasing a new model, LMSYS elo score would be ideal, but it's not always possible to get into the arena. In that case, combining chatty evals (MT Bench and IFEval) with some more knowledge-heavy benchmarks (AGIEval and TruthfulQA) can be a good way to get a good understanding of the model's capabilities. GMS8K and HumanEval (we'll learn about this one soon) is frequently added to the chat mix to make sure the model has math and code capabilities.
+
+### Addendum
+
+My colleague [Lewis](https://twitter.com/_lewtun) suggested me to add two other benchmarks for chat models:
+
+* **EQ Bench:** [This benchmark](https://eqbench.com/) is growingly popular, has a strong correlation with the chatbot arena ELO (r=0.94), and does not require a judge, making it a quick benchmark to get a sense of the model. It asseses emotional intelligence, and it's a great way to see how well the model can understand and generate emotional responses.
+
+* **GPQA:** This graduate-level benchmark is a challenging dataset of 198 multiple-choice questions crafted by domain experts (there are also 448 and 546 options). Highly skilled non-expert validators (PhD in other domains), even with web access and spending over 30 minutes per question on average, reached 34% accuracy. Domain experts with or pursuing PhDs in the relevant fields achieve an accuracy of 65%. As a reference, GPT-4 achieves 35.7% and Claude 3 Opus achieves 50.4% here, which is quite impressive!
 
 ## More on benchmarks
 
@@ -178,6 +185,5 @@ Code is definitely a big area in benchmarks too! Let's briefly look at them:
 * **MBPP+:** This is MBPP with 35x more tests.
 
 We've seen some models have great performance in HumanEval but not so great in MBPP, so it's important to use multiple benchmarks to get a good understanding of the model's capabilities.
-
 
 I hope you liked this blog post! If you like this blog post, don’t hesitate to leave a [GitHub Star](https://github.com/osanseviero/hackerllama) or share it, that’s always appreciated and motivating!
