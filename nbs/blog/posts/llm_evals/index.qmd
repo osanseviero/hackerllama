@@ -22,7 +22,7 @@ When a new base architecture is released, usually the most interesting is **to c
 
 ### The LLM Leaderboard
 
-Hugging Face [LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard) is a good place to start. This leaderboard contains a ranking of open-access models across different benchmarks. Benchmarks are just a fancy way of calling test datasets. They provide a standardized method to evaluate LLMs and compare them. That said, they are not a perfect way to evaluate how they will be used in practice and can be gamed, so consider the leaderboard mostly as a quality proxy of how well the models can be done when fine-tuned. The leaderboard runs on spare cycles of Hugging Face's cluster and is frequently updated with the latest models.
+Hugging Face [LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard) is a good place to start. This leaderboard contains a ranking of open-access models across different benchmarks. Benchmarks are just a fancy way of calling test datasets. They provide a standardized method to evaluate LLMs and compare them. That said, they are not a perfect way to evaluate how they will be used in practice and can be gamed, so consider the leaderboard mostly as a quality proxy of how well the models can be done when fine-tuned. The leaderboard runs on spare cycles of Hugging Face's cluster and is frequently updated with the latest models. The Leaderboard also contains results at different precisions and even quantized models, making it interesting to compare how these impact the model's performance.
 
 In my opinion, the LLM Leaderboard is specially useful for pre-trained (base) models. Although it provides some signal for chat models, these benchmarks really don't dive into chat capabilities. So, my first tip if looking for a base model is to filter for only pretrained models.
 
@@ -150,13 +150,13 @@ The previous metrics and factors were useful to pick a pre-trained model you mig
 
 When releasing a new model, LMSYS elo score would be ideal, but it's not always possible to get into the arena. In that case, combining chatty evals (MT Bench and IFEval) with some more knowledge-heavy benchmarks (AGIEval and TruthfulQA) can be a good way to get a good understanding of the model's capabilities. GMS8K and HumanEval (we'll learn about this one soon) is frequently added to the chat mix to make sure the model has math and code capabilities.
 
-### Addendum
+## Addendum
 
-My colleague [Lewis](https://twitter.com/_lewtun) suggested me to add two other benchmarks for chat models:
+My colleagues [Lewis](https://twitter.com/_lewtun) and [Clémentine](https://twitter.com/clefourrier) provided some nice feedback for this blog post. They suggested I add two other benchmarks:
 
-* **EQ Bench:** [This benchmark](https://eqbench.com/) is growingly popular, has a strong correlation with the chatbot arena ELO (r=0.94), and does not require a judge, making it a quick benchmark to get a sense of the model. It asseses emotional intelligence, and it's a great way to see how well the model can understand and generate emotional responses.
+* **EQ Bench:** (for chat models) [This benchmark](https://eqbench.com/) is growingly popular, has a strong correlation with the chatbot arena ELO (r=0.94), and does not require a judge, making it a quick benchmark to get a sense of the model. It asseses emotional intelligence, and it's a great way to see how well the model can understand and generate emotional responses.
 
-* **GPQA:** This graduate-level benchmark is a challenging dataset of 198 multiple-choice questions crafted by domain experts (there are also 448 and 546 options). Highly skilled non-expert validators (PhD in other domains), even with web access and spending over 30 minutes per question on average, reached 34% accuracy. Domain experts with or pursuing PhDs in the relevant fields achieve an accuracy of 65%. As a reference, GPT-4 achieves 35.7% and Claude 3 Opus achieves 50.4% here, which is quite impressive!
+* **GPQA:** (both base and chat models) This graduate-level benchmark is a challenging dataset of 198 multiple-choice questions crafted by domain experts (there are also 448 and 546 options). Think of this as a super difficult MMLU. Highly skilled non-expert validators (PhD in other domains), even with web access and spending over 30 minutes per question on average, reached 34% accuracy. Domain experts with or pursuing PhDs in the relevant fields achieve an accuracy of 65%. As a reference, GPT-4 achieves 35.7% and Claude 3 Opus achieves 50.4% here, which is quite impressive!
 
 ## More on benchmarks
 
@@ -174,7 +174,7 @@ The most important takeaway here is to benchmark depending on how you're going t
 
 Code is definitely a big area in benchmarks too! Let's briefly look at them:
 
-* **HumanEval:** This is a benchmark that measures functional correctness by generating code based on a docstring. It's a Python benchmark, but there are translations to 18 other languages (which is called MultiPL-E). Unfortunately, it just contains 164 Python programming problems, so when you see a big viral tweet of someone claiming a 1% improvement, it usually means it gets 2 more problems right. It's a very nice benchmark, but it's not as comprehensive as you might think. You can find HumanEval results for some dozens of languages in the [BigCode Models Leaderboard].
+* **HumanEval:** This is a benchmark that measures functional correctness by generating code based on a docstring. It's a Python benchmark, but there are translations to 18 other languages (which is called MultiPL-E). Unfortunately, it just contains 164 Python programming problems, so when you see a big viral tweet of someone claiming a 1% improvement, it usually means it gets 2 more problems right. It's a very nice benchmark, but it's not as comprehensive as you might think. You can find HumanEval results for some dozens of languages in the [BigCode Models Leaderboard](https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard).
 
 ![](code.png)
 
