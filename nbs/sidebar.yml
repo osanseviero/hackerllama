@@ -17,6 +17,9 @@ website:
               - section: llm_evals
                 contents: []
                 href: blog/posts/llm_evals/index.qmd
+              - section: minimal-quantize-intro
+                contents: []
+                href: blog/posts/minimal-quantize-intro/index.qmd
               - section: random_transformer
                 contents: []
                 href: blog/posts/random_transformer/index.ipynb

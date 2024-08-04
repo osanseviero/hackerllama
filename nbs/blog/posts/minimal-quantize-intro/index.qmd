@@ -1,0 +1,103 @@
+---
+date: "08/04/2024"
+toc: false
+twitter-card: true
+title: A minimal Introduction to Quantization
+format:
+  html:
+    comments:
+      utterances:
+         repo: osanseviero/hackerllama
+---
+
+
+For the last couple of weeks, I've been considering writing some introductory content for quantization. After exploring a bit more, I realized there are many great resources for it! Rather than write an in-depth introduction to the topic, I'll give a couple of high-level explanations and link to relevant resources. I hope you find this useful! Feel free to leave a star in [the GitHub repository](https://github.com/osanseviero/hackerllama) if you do.
+
+## What is Quantization?
+
+When we talk about models such as GPT-4, we're referring to neural networks with billions of parameters. Each of these parameters is a number that needs to be stored with some precision. For instance, during training, a 32-bit floating-point number is usually used. However, for deployment and inference, we do not need that level of precision and can hence use fewer bits to store these numbers.
+
+## What do different numbers represent.
+
+The following table shows the range of numbers and the precision that can be represented with different data types:
+
+| Data Type | Range of numbers | Precision |
+|-----------|-------------------|-----------|
+| float32   | -1.18e38 to 3.4e38 | 7 digits  |
+| float16   | -65k to 65k       | 3 digits  |
+| bfloat16  | -3.39e38 to 3.39e38       | 3 digits  |
+| int8      | -128 to 127       | 0 digits  |
+| int4      | -8 to 7           | 0 digits  |
+
+
+## How much memory does a model need?
+
+Models come in all sizes! Llama 3.1, for example, came out in three sizes: 8B, 70B, and 405B. Let's go through a quick estimate of how much memory would be needed to **load a model**:
+
+* 8B means that the model has 8 billion parameters.
+* If you want to use the model for inference, you would use 16-bit numbers (e.g., bfloat16) to store the parameters.
+* So we have 8 billion parameters, each one using 16 bits (or 2 bytes).
+
+A quick estimate is calculated as:
+
+$$
+needed_bytes = bytes\_per\_parameter * number\_of\_parameters
+$$
+
+For the 8B model, we would need
+
+$$
+needed_bytes = 16 * 8e9 / 8 = 16000000000 bytes = 16GB
+$$
+
+Note that this is a very rough estimate and it's just to load the model. You also need to take into account the memory needed for the input and output tensors, as well as the memory needed for the intermediate computations. For example, using long sequences would require more memory than using short sequences.
+
+## Useful Napkin Math
+
+Without going into too much detail, the following table shows the memory needed to load 2B, 8B, 70B, and 405B models using different data types:
+
+| Model Size | float32 | float16 | int8 | int4 |
+|------------|---------|---------|------|------|
+| 2B         | 8GB     | 4GB     | 2GB  | 1GB  |
+| 8B         | 32GB    | 16GB    | 8GB  | 4GB  |
+| 70B        | 280GB   | 140GB   | 70GB | 35GB |
+| 405B       | 1620GB  | 810GB   | 405GB| 202GB|
+
+For reference, a H100 has 80GB of memory, so loading Llama 3.1 405B would require at least a full node (of 8 H100s) to load the model in 8-bit integers.
+
+Once again, consider that these are just estimates. For training, you would require more memory to store the gradients. For more precise calculations, please review the following resources:
+
+* [Breaking down GPU VRAM consumption](https://asmirnov.xyz/vram)
+* [Eleuther Transformer Math 101](https://blog.eleuther.ai/transformer-math/)
+* [gist for transformer memory usage](https://gist.github.com/Quentin-Anthony/f43939791a7ceb0b01a4937308317be5)
+* [Interactive LLM Model Calculator](https://huggingface.co/spaces/NyxKrage/LLM-Model-VRAM-Calculator)
+
+## Let's Talk More About Quantization
+
+
+Going from 32-bit floating-point numbers to 16-bit floating-point numbers is a common practice. However, you can also use 8-bit integers, 4-bit integers, or even ternary numbers! For certain models such as Mixture of Experts, even sub 1-bit per parameter has been explored.
+
+Some quick things to take into account
+
+* As you go from 32-bit to 16-bit to 8-bit, you lose precision. This means that the model will not be able to represent the same range of numbers as before. Beyond 8-bit, the model tends to degrade and lose quality. However, 8-bit and 4-bit models are very popular in the community, and there are significant efforts to push these even further.
+* There are many quantization methods (AQLM, AWQ, bitsandbytes, GGUF, HQQ, etc.) and there is no single best method. The best method depends on the model, the target number of bits, the target hardware, and few other factors. The [transformers docs](https://huggingface.co/docs/transformers/main/en/quantization/overview#when-to-use-what) have a nice table with the different features of the quantization methods.
+* Smaller quants will use less memory, but they are not necessarily faster. This is a bit counterintuitive. On one hand, you have fewer bits to use for the computation, but on the other hand, some quantization methods add overhead to the computation. For example, _bitsandbytes_ (as far as I know) does not support 4-bit compute and converts the 4-bit integers to half precision as needed.
+* Evaluating quantization precisely is not trivial. I don't think there's too much discussion about this, but the recent Llama 3.1 405B release led to a situation in which different API providers were serving the same model with different quality. Fireworks AI wrote a [blog post](https://fireworks.ai/blog/fireworks-quantization) about evaluatin quantization quality through different methods.
+
+## Where to learn about quantization?
+
+Here are some resources I recommend
+
+* [A Visual Guide to Quantization](https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-quantization#footnote-3-145531349): this is a nice up-to-date guide to quantization, with a high-level introduction to quantization techniques and a nice introduction to BitNet. It is very visual and easy to follow.
+* [Introduction to Quantization cooked in 🤗 with 💗🧑‍🍳](https://huggingface.co/blog/merve/quantization): this blog post is a bit outdated (as it's from 2023), but gives a quick introduction to quantization, GPTQ, bitsandbytes, and some nice code samples.
+* [A Gentle Introduction to 8-bit Matrix Multiplication for transformers at scale using Hugging Face Transformers, Accelerate and bitsandbytes](https://huggingface.co/blog/hf-bitsandbytes-integration): this masterpiece by Tim Dettmers and Younes is a great way to understand more in depth how INT8 quantization methods work. 
+* [Maxime Labonne's blog](https://mlabonne.github.io/blog/posts/Introduction_to_Weight_Quantization.html) has a nice series of blog posts showcasing GPTQ, GGUF, and ExLlamaV2 in a practical way.
+
+If you prefer video format, there are two free courses from DeepLearning.AI + Hugging Face.
+
+* [Quantization Fundamentals](https://www.deeplearning.ai/short-courses/quantization-fundamentals-with-hugging-face/): This course shows how to quantize open access models, how to optimize any model (independently of their modality), and how to do downcasting.
+* [Quantization in Depth](https://www.deeplearning.ai/short-courses/quantization-in-depth/): This ocurse goes deeper to implementing quantization from scratch and bulding a general-purpose quantizer.
+
+Quantization can also be mixed with training. In 2023, QLoRA, a method that combines parameter efficient training techniqus (LoRA in particular) with quantization led to way that allow us to fine-tune 7B models even with free Google Colab instances! QLoRA is nowadays well integrated across the ecosystem (e.g., in transformers, trl for RLHF, axolotl, etc.). You can read its [original blog post](https://huggingface.co/blog/4bit-transformers-bitsandbytes) for more information about it.
+
+Thanks for reading!
