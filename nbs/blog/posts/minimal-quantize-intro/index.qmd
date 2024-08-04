@@ -101,3 +101,5 @@ If you prefer video format, there are two free courses from DeepLearning.AI + Hu
 Quantization can also be mixed with training. In 2023, QLoRA, a method that combines parameter efficient training techniqus (LoRA in particular) with quantization led to way that allow us to fine-tune 7B models even with free Google Colab instances! QLoRA is nowadays well integrated across the ecosystem (e.g., in transformers, trl for RLHF, axolotl, etc.). You can read its [original blog post](https://huggingface.co/blog/4bit-transformers-bitsandbytes) for more information about it.
 
 Thanks for reading!
+
+![](llamas.png)
