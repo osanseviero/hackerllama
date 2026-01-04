@@ -5,38 +5,43 @@ image: hacker.png
 # page-layout: full 
 ---
 
-**Hi there!** I'm Omar, the Chief Llama Officer at Hugging Face. 🦙
+**Hi there!** I'm Omar, and I **Lead Developer Experience at Google DeepMind**.
 
-I work at the intersection of Open Source, Product, Research, and technical communities, leading multidisciplinary teams and open source and science collaborations.
-
-Previously, I was a Software Engineer at Google building ML models and infrastructure that power multiple features in Google Assistant. I also had a short stint as a 20% Product Manager in the TensorFlow Graphics team. 
+I work at the intersection of Product, Engineering, Research, and Community, leading a global team dedicated to empowering developers to build the next generation of AI-powered applications.
 
 In this website, I write about Machine Learning and Open Source. 🤗 Check out the [Blog](/blog/) section!
 
-
 ![](profile.jpeg)
 
-### About my work at Hugging Face
+### Currently: Leading Developer Experience at Google DeepMind
 
-One of the funnest things about my role is that no day looks the same. One day might be a rush to get [Llama 2](https://huggingface.co/blog/llama2) ready for releasing, while another day might involve learning and writing about [Mixture of Experts](https://huggingface.co/blog/moe). Given my role, I get to work with a bunch of folks all across the company and ecosystem, from [research](https://scholar.google.com/citations?user=1CHq4KcAAAAJ&hl=en) to product.
-I try to do most of my work in the open, so you can check my social media accounts or GitHub to see some of my work. Some of the things I'm proud to have shipped:
+Our mission is to empower developers to build with AI by providing the leading developer experience for Google DeepMind’s AI products, including AI Studio, the Gemini API, and Gemma.
 
-* We launched [Hugging Face Spaces](http://hf.co/spaces) at the end of 2022; it enables the community to build, share, and collaborate in ML demos. With consistent growth for 2 years, we went from 500 Spaces to over 400k demos built by the community!
-* Created and grew up the Developer Advocacy Engineering and Moonshot teams; the teams work in ML topics such as on-device, Audio, Healthcare, Artists Ecosystems, Reinforcement Learning, 3D Computer Vision, Gaming, and more!
-* Built key collaborations and partnerships with OS communities and libraries.
-* Implemented technical integrations with OS libraries such as [spaCy](https://huggingface.co/blog/spacy) and [Sentence Transformers](https://huggingface.co/blog/sentence-transformers-in-the-hub).
+As the Developer Experience Lead, I drive developer success and product adoption by ensuring our AI developer products are intuitive, powerful, and easy to build with. My work involves:
 
+* **Strategic Integration**: Partnering with developers' favorite tools and platforms to ensure seamless AI integration.
+* **Developer Advocacy & Empathy**: Influencing product roadmaps, leading educational initiatives, and crafting world-class documentation based on deep developer empathy.
+* **End-to-End Lifecycle**: My team is involved from early technical designs and feature ideation to successful global launches and continuous iteration.
+* **Model Launches**: Leading the developer experience and launches for major models including **Gemini**, **Gemma**, and **Nano Banana**.
 
-### Location
+### Career Highlights
 
-🇨🇭 Currently located in Zurich.
+#### **Hugging Face** | *Chief Llama Officer* / Head of Platform and Community (Previously)
 
-🇲🇽 Lived in Mexico for 12 years.
+I spent several years at the heart of the open-source AI revolution. I led multidisciplinary teams and open-source collaborations that shaped the ecosystem.
 
-🇵🇪 Lived in Peru for 9 years.
+* Launched [Hugging Face Spaces](http://hf.co/spaces), scaling from 500 to over 400k community-built demos.
+* Built key partnerships with labs (Meta, Google, etc.) and open-source communities and established technical integrations with libraries like spaCy and Sentence Transformers.
+* Created and scaled the Developer Advocacy Engineering and Moonshot organizations (25 people when I left).
 
-🇵🇦 Lived in Panama for 2 years.
+#### **Google** | *Software Engineer & Product Manager*
+Built ML models and infrastructure for **Google Assistant** and served as a 20% Product Manager for the TensorFlow Graphics team.
 
-I also had the great opportunity of doing internships in Seattle and Mountain View. The rest of my time has been visiting my family 🇺🇾 🇨🇴 🇪🇸.
+---
 
-Feel free to connect with me in [LinkedIn](https://www.linkedin.com/in/omarsanseviero/), follow me in [Twitter](https://twitter.com/osanseviero), or reach out to osanseviero at gmail.com.
+### Location & Connection
+
+🇨🇭 Currently based in **Zurich**.
+🌎 Lived in Mexico, Peru, and Panama. Internships in Seattle and Mountain View.
+
+Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/omarsanseviero/), follow me on [Twitter](https://twitter.com/osanseviero), or reach out at osanseviero at gmail.com.

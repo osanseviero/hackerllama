@@ -1,103 +1,47 @@
 ---
-title: "Misc Resources"
+title: "Resources & Engagements"
 ---
 
-I love to share my knowledge with others, so I try to give talks whenever possible. This also led me to create AI Learners, a non-profit Spanish-speaking community in which we offer talks and workshops on topics such as Machine Learning, Deep Learning, Natural Language Processing and Computer Vision for people of all levels of knowledge.
+### Publications & Books
 
-### Co-authored
+#### [**Hands-on Generative AI with Transformers and Diffusion Models**](https://www.oreilly.com/library/view/hands-on-generative-ai/9781098149239/) (O'Reilly Media, 2024)
+*My book on building real-world Generative AI applications using the latest Transformers and Diffusion models. A practical guide for developers and researchers.*
 
-Papers (among [others](https://scholar.google.com/citations?hl=en&user=1CHq4KcAAAAJ&view_op=list_works&sortby=pubdate))
+#### Selected Papers
+I have co-authored several papers at the intersection of alignment, dataset creation, and evaluation. You can find a full list on [Google Scholar](https://scholar.google.com/citations?hl=en&user=1CHq4KcAAAAJ).
 
 * [Zephyr: Direct Distillation of LM Alignment](https://arxiv.org/abs/2310.16944)
 * [Federated benchmarking of medical artificial intelligence with MedPerf](https://www.nature.com/articles/s42256-023-00652-2)
 * [AfroDigits: A Community-Driven Spoken Digit Dataset for African Languages](https://arxiv.org/abs/2303.12582)
 * [Evaluate & Evaluation on the Hub: Better Best Practices for Data and Model Measurement](https://arxiv.org/abs/2210.01970)
 
-Blogs (not exhaustive)
+---
 
-* [Mixture of Experts Explained](https://huggingface.co/blog/moe)
-* [Welcome Mixtral - a SOTA Mixture of Experts on Hugging Face](https://huggingface.co/blog/mixtral)
-* [Code Llama: Llama 2 learns to code](https://huggingface.co/blog/codellama)
-* [The Falcon has landed in the Hugging Face ecosystem](https://huggingface.co/blog/falcon)
-* [Llama 2 is here - get it on Hugging Face](https://huggingface.co/blog/llama2)
+### Speaking & Community
 
-### Workshops 
+I am passionate about sharing knowledge and have delivered **over 100 talks and workshops** globally. My sessions cover topics such as **Open Source Machine Learning**, **Large Language Models (LLMs)**, **Generative AI**, and **Hacker-centric Product Development**.
 
-If you want to invite me to give a workshop/conference/talk, feel free to reach out to omar at huggingface.co. My aim is to do less talks and focus my energy in very key topics and high-quality content. Here are some of my previous talks (mix of English and Spanish):
+#### Featured Engagements
+* **Google I/O & Google Cloud Next**: Showcasing the future of AI development and Developer Experience.
+* **Paris ICCV Meetup**: Organized a community event for **2000+ people** in the heart of Paris.
+* **Global Conferences**: Keynotes and workshops at **EuroPython**, **T3chFest**, **DataFest Armenia**, and various **PyCons** (Chile, Argentina, Sweden, South Africa).
+* **Academic & Industry Guest Talks**: Sessions at **Columbia University**, **ETH Zurich**, **IBM Research**, and **UZH**.
 
-| Name                                                                                                                                                                                       | Date        | Audience                                                                     | Location    |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|------------------------------------------------------------------------------|-------------|
-| ML Demos (OS Startup Accelerator with Meta)                                                                                                                                     | April, 2024   | Meta                                                                  | Paris |
-| Open Source ML                                                                                                                                      | Mar, 2024   | T3chFest                                                                 | Madrid |
-| Open Source ML - from pretrained models to production                                                                                                                                      | Nov, 2023   | AI Learners                                                                  | Mexico City |
-| Introduction to transformers                                                                                                                                                               | Nov, 2023   | Universities networks                                                        | Mexico City |
-| Open Source ML - from pretrained models to production                                                                                                                                      | Nov, 2023   | BBVA                                                                         | Mexico City |
-| [Interview with Platzi](https://www.youtube.com/watch?v=SvL2afbxnFk&ab_channel=Platzi)                                                                                                     | Nov, 2023   | Platzi                                                                       | Online      |
-| Open Source ML - from pretrained models to production                                                                                                                                      | June, 2023  | INTERFACE 2023                                                               | Online      |
-| LLMs in Prod Conference Lightning talk                                                                                                                                                     | June, 2023  | LLMs in Prod Conference                                                      |             |
-| Colloquium about NLP trends                                                                                                                                                                | April, 2023 | UZH                                                                          | Zurich      |
-| Collaborative Machine Learning for the future of AI                                                                                                                                        | Feb, 2023   | Columbia University                                                          | NYC         |
-| Collaborative Machine Learning for the future of AI                                                                                                                                        | Feb, 2023   | IBM                                                                          | NY          |
-| Machine Learning Open Source                                                                                                                                                               | Feb, 2023   | ITAM University                                                              | Online      |
-| Hands-on Workshop with Gradio                                                                                                                                                              | Sept, 2022  | [RIIAA](https://www.riiaa.org/)                                              | Online      |
-| Craft amazing Machine Learning demos                                                                                                                                                       | Sept, 2022  | [DataFest Armenia](https://datafest.am/2022/agenda)                          | Yerevan     |
-| How to craft awesome Machine Learning Demos with Python                                                                                                                                    | Aug, 2022   | Google ML Bootcamp                                                           | Online      |
-| How to craft awesome Machine Learning Demos with Python                                                                                                                                    | July, 2022  | EuroPython                                                                   | Dublin      |
-| Stories of Open Source Machine Learning                                                                                                                                                    | June, 2022  | BAAI                                                                         | Online      |
-| anel on Multilinguality in multimodal research and open data                                                                                                                               | April, 2022 | [Wiki-M3L](https://meta.wikimedia.org/wiki/Wiki-M3L/Program) at ICLR         | Online      |
-| Open data Keynote                                                                                                                                                                          | April, 2022 | [Wiki-M3L](https://meta.wikimedia.org/wiki/Wiki-M3L/Program) at ICLR         | Online      |
-| Open Machine Learning                                                                                                                                                                      | April, 2022 | [QCon](https://qconlondon.com/london2022/presentation/open-machine-learning) | London      |
-| ands on Workshop with Hugging Face                                                                                                                                                         | March 2022  | University of Groningen                                                      | Online      |
-| ands on Workshop with Hugging Face                                                                                                                                                         | March 2022  | Sorbonne Universiy                                                           | Online      |
-| ands on Workshop with Hugging Face                                                                                                                                                         | Feb, 2022   | AI.Slovakia Radio                                                            | Online      |
-| ands on Workshop with Hugging Face                                                                                                                                                         | Feb 2022    | IITG.ia                                                                      | Online      |
-| How to build ML in an open and collaborative way                                                                                                                                           | Feb, 2022   | [AI Sweden NLP Seminar Series](https://www.ai.se/en/events/nlp-seminar-0)    | Online      |
-| Building Machine Learning demos with Python                                                                                                                                                | Oct, 2021   | PyCon Chile                                                                  | Online      |
-| Building Machine Learning demos with Python                                                                                                                                                | Oct, 2021   | PyCon Argentina                                                              | Online      |
-| Building Machine Learning demos with Python                                                                                                                                                | Oct, 2021   | PyCon Sweden                                                                 | Online      |
-| Building Machine Learning demos with Python                                                                                                                                                | Oct, 2021   | PyconZa                                                                      | Online      |
-| [NLP from Zero to Hero, Building NLP demos with Spaces](https://www.youtube.com/watch?v=wSI8shazYaA&list=PLBILcz47fTtPspj9QDm2E0oHLe1p67tMz&index=7&ab_channel=SpainAI)                    | Oct, 2021   | SpainAI                                                                      | Online      |
-| [Podcast: Democratizing AI](https://www.pscp.tv/w/1yoKMAoWVbdKQ)                                                                                                                           | Sept, 2021  | SaturdaysAI                                                                  | Online      |
-| [Podcast: In the frontier of the development of AI](https://open.spotify.com/episode/52p07ob8U7T7TX3fLpIATB)                                                                               | Sept, 2021  | LATAM Minds                                                                  | Online      |
-| [NLP from Zero to Hero, Word Embeddings](https://www.youtube.com/watch?v=RunqyndjEbg&list=PLBILcz47fTtPspj9QDm2E0oHLe1p67tMz&ab_channel=SpainAI)                                           | July, 2021  | Somos NLP                                                                    | Online      |
-| Contributing to the Open Source ML Ecosystem                                                                                                                                               | July, 2021  | Talent Land Mexico                                                           | Online      |
-| [Open Source Ecosystem of ML and NLP](https://www.datascience.pe/talleres-virtuales-gratuitos/7e0ao7QNEOkcMnkKjV8Apj?fbclid=IwAR2XD0aIvCfNwArWL75XatCj8PEtY50SuYsW6KDRaSn9vYdp7hLHOZ1Gck0) | June, 2021  | Data Science Research Peru                                                   | Online      |
-| Differentiable 3D Graphics                                                                                                                                                                 | Aug, 2020   | RIIAA                                                                        | Online      |
-| [Conversation about AI](https://www.meetup.com/es-ES/ai_hub/events/271683384/)                                                                                                             | July, 2020  | ELIA                                                                         | Online      |
-| [ML in production two days workshop](https://github.com/TheHackerLlama/ml_en_produccion/blob/master/End%20to%20End%20Machine%20Learning.pdf)                                               | Oct, 2019   | EOI Business School                                                          | Madrid      |
-| Introduction to Machine Learning and the regulation efforts                                                                                                                                | April, 2019 | UN Women Colombia                                                            | Bogota      |
-| End to end Machine Learning                                                                                                                                                                | March, 2019 | Data Science Research Peru                                                   | Lima        |
-| World Models                                                                                                                                                                               | March, 2019 | Data Science Research Peru                                                   | Lima        |
-| [Introduction to TensorFlow](https://www.youtube.com/watch?v=muHlVLV6Ub8)                                                                                                                  | March, 2019 | AI Learners                                                                  | Online      |
-| [Generative Adversarial Networks](https://www.youtube.com/watch?v=IRasZVkVP7k)                                                                                                             | 2018        | AI Learners                                                                  | Online      |
-| [Neural Networks](https://www.youtube.com/watch?v=tSjciY0KNdw&t=4s&ab_channel=AILEARNERS)                                                                                                  | 2018        | AI Learners                                                                  | Mexico City |
-| Introduction to Deep Learning                                                                                                                                                              | 2018        | MVS Radio                                                                    | Mexico City |
-| Deep Learning in a real setting                                                                                                                                                            | 2018        | MVS Radio                                                                    | Mexico City |
-| World Models, can a program learn from its dreams?                                                                                                                                         | 2018        | AI Learners                                                                  | Mexico City |
-| Introduction to Deep Learning and Neural Networks                                                                                                                                          | 2018        | AI Learners                                                                  | Mexico City |
-| Introduction to Deep Learning                                                                                                                                                              | 2018        | HackRobots                                                                   | Mexico City |
+---
 
-### Successes brag-list 
+### Key Successes & Impact
 
-* Spontaneously proposing and organizing a "small meetup" in Paris during ICCV that ended up with over 2000 people ([Yann approves](https://twitter.com/ylecun/status/1710052799898116157)) 
-* Very involved in the release of Falcon 180, Llama 2, Code Llama, [NASA x IBM](https://newsroom.ibm.com/2023-08-03-IBM-and-NASA-Open-Source-Largest-Geospatial-AI-Foundation-Model-on-Hugging-Face), Mixtral, and XTTS, among others.
-* Enabled members from different teams to do impactful and exciting things, such as launching a [course with Andrew Ng](https://twitter.com/AndrewYNg/status/1684233418782179328).
-* Launching the HF Discord Server which has nicely grown over the years (you can join at [hf.co/join/discord(hf.co/join/discord)])
-* Collaborated with the Google Colab team for a couple of features, such as [notebooks on HF](https://twitter.com/GoogleColab/status/1637851385893998597)!
-* Going from 20k repos to over a million repositories on Hugging Face. Repos go brrr 🔥
-* Launch of Spaces Docker templates (collaborated with [Docker](https://twitter.com/Docker/status/1640845221964525573), Argilla, [Elixir](https://twitter.com/livebookdev/status/1625872160441999361), LabelStudio, [AimStack](https://twitter.com/aimstackio/status/1648728969557028871?s=61&t=biYksbLBAYulzGaG_UUWvQ), [Shiny](https://twitter.com/posit_pbc/status/1655624912923672576), ZenML, Anaconda, and Giskard).
+* **Scale**: Helped grow Hugging Face from 20k repos to **over 1 million repositories**.
+* **Community Leadership**: Launched the Hugging Face Discord Server and scaled the community to hundreds of thousands of members.
+* **Product Adoption**: Spearheaded the release of **Hugging Face Spaces**, enabling the creation of over **400k community demos**.
+* **Strategic Partnerships**: Led major collaborations with **Meta**, **Google**, **NASA**, and **IBM** for foundational model releases (Llama 2, Mixtral, Falcon 180, etc.).
+* **Educational Reach**: Partnered with Andrew Ng's DeepLearning.AI to launch high-impact ML courses.
 
+---
 
-### Courses taught (very old)
+### Previous Teaching (2017–2018)
 
-I should update these one day
-
-* Machine Learning for economists (Mexico City, 2018)
-  * Taught a small group of economists Machine Learning basics and how to apply it for practical economy problem.
-  * **Topics:** Machine Learning, linear regression, classification, regularization, how to evaluate learning algorithms, deep learning, clustering, reinforcement learning, and recurrent neural networks.
-* Practical Deep Learning (Mexico City, 2018)
-  * Gave a three months course at the ITESM (Tecnológico de Monterrey) to CS students about practical Deep Learning.
-  * **Topics:** Introduction to Deep Learning, backpropagation, convolutional neural networks, recurrent neural networks, LSTMs, embeddings and word2vec, Reinforcement Learning, world models, and an introduction to TensorFlow.
-* Immersive Web Development (Mexico City, 2017)
-  * Throughout two semesters, I taught an introduction to web development course to CS students.
-  * **Topics:** HTML5 & CSS3, designing their own framework, bootstrap and polymer, JavaScript, JQuery, APIs, Node, Selenium, and front end optimization.
+Before moving fully into industry leadership, I taught several academic and professional courses:
+* **Machine Learning for economists** (Mexico City)
+* **Practical Deep Learning** (ITESM / Tecnológico de Monterrey)
+* **Immersive Web Development** (Mexico City)
