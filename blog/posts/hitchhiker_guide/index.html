@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-01-12">
+
+<title>The Llama Hitchiking Guide to Local LLMs – hackerllama</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../../hacker.png" rel="icon" type="image/png">
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b758ccaa5987ceb1b75504551e579abf.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-7f54657f98cfd61baa5fc740dde4b5a5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-SF72633X8L"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-SF72633X8L', { 'anonymize_ip': true});
+</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+<meta property="og:title" content="The Llama Hitchiking Guide to Local LLMs – hackerllama">
+<meta property="og:description" content="Omar Sanseviero Personal Website">
+<meta property="og:image" content="https://osanseviero.github.io/hackerllama/blog/posts/hitchhiker_guide/localllama.jpeg">
+<meta property="og:site_name" content="hackerllama">
+<meta name="twitter:title" content="The Llama Hitchiking Guide to Local LLMs – hackerllama">
+<meta name="twitter:description" content="Omar Sanseviero Personal Website">
+<meta name="twitter:image" content="https://osanseviero.github.io/hackerllama/blog/posts/hitchhiker_guide/localllama.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">hackerllama</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../resources.html"> 
+<span class="menu-text">Misc Resources</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/osanseviero"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/omarsanseviero/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/osanseviero"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../../blog/index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">The Llama Hitchiking Guide to Local LLMs</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 12, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Here are some terms that are useful to know when joining the Local LLM community.</p>
+<ol type="1">
+<li><p><strong>LocalLlama:</strong> A <a href="https://www.reddit.com/r/LocalLLaMA/">Reddit community</a> of practitioners, researchers, and hackers doing all kinds of crazy things with ML models.</p>
+<p><img src="localllama.jpeg" class="img-fluid"></p></li>
+<li><p><strong>LLM:</strong> A Large Language Model. Usually a transformer-based model with a lot of parameters…billions or even trillions.</p></li>
+<li><p><strong>Transformer:</strong> A type of neural network architecture that is very good at language tasks. It is the basis for most LLMs.</p></li>
+<li><p><strong>GPT:</strong> A type of transformer that is trained to predict the next token in a sentence. GPT-3 is an example of a GPT model…who could tell??</p>
+<p>4.1 <strong>Auto-regressive:</strong> A type of model that generates text one token at a time. It is auto-regressive because it uses its own predictions to generate the next token. For example, the model might receive as input “Today’s weather” and generate the next token, “is”. It will then use “Today’s weather is” as input and generate the next token, “sunny”. It will then use “Today’s weather is sunny” as input and generate the next token, “and”. And so on.</p></li>
+<li><p><strong>Token:</strong> Models don’t understand words. They understand numbers. When we receive a sequence of words, we convert them to numbers. Sometimes we split words into pieces, such as “tokenization” into “token” and “ization”. This is needed because the model has a limited vocabulary. A token is the smallest unit of language that a model can understand.</p></li>
+<li><p><strong>Context length:</strong> The number of tokens that the model can use at a time. The higher the context length, the more memory the model needs to train and the slower it is to run. E.g. Llama 2 can manage up to 4096 tokens.</p>
+<p>6.1 <strong>LLaMA:</strong> A pre-trained model trained by Meta, shared with some groups in a private access, and then leaked. It led to an explosion of cool projects. 🦙</p>
+<p>6.2 <strong>Llama 2:</strong> An open-access pre-trained model released by Meta. It led to another explosion of very cool projects, and this one was not leaked! The license is not technically open-source but it’s still quite open and permissive, even for commercial use cases. 🦙🦙</p>
+<p>6.3 <strong>RoPE:</strong> A technique that allows you to significantly expand the context lengths of a model.</p>
+<p>6.4 <strong>SuperHot:</strong> A technique that allows expanding the context length of RoPE-based models even more by doing some minimal additional training.</p></li>
+<li><p><strong>Pre-training:</strong> Training a model on a very large dataset (trillion of tokens) to learn the structure of language. Imagine you have millions of dollars, as a good GPU-Rich. You usually scrape big datasets from the internet and train your model on them. This is called pre-training. The idea is to end with a model that has a strong understanding of language. This does not require labeled data! This is done before fine-tuning. Examples of pre-trained models are GPT-3, Llama 2, and Mistral.</p>
+<p>7.1 <strong>Mistral 7B:</strong> A pre-trained model trained by Mistral. Released via torrent.</p>
+<p><img src="mistral.png" class="img-fluid"></p>
+<p>7.2 <strong>Phi 2:</strong> A pre-trained model by Microsoft. It only has 2.7B parametrs but it’s quite good for its size! It was trained with very little data (textbooks) which shows the power of high-quality data.</p>
+<p>7.3 <strong>transformers:</strong> a Python library to access models shared by the community. It allows you to download pre-trained models and fine-tune them for your own needs</p>
+<p>7.4 <strong>Base vs conversational:</strong> a pre-trained model is not specifically trained to “behave” in a conversational manner. If you try to use a base model (e.g.&nbsp;GPT-3, Mistral, Llama) directly to do conversations, it won’t work as well as the fine-tuned conversational variant (ChatGPT, Mistral Instruct, Llama Chat). When looking at benchmarks, you want to compare base models with base models and conversational models with conversational models.</p></li>
+<li><p><strong>Fine-tuning:</strong> Training a model on a small (labeled) dataset to learn a specific task. This is done after pre-training. Imagine you have a few dollars, as a good fellow GPU-Poor. Rather than training a model from scratch, you pick a pre-trained (base) model and fine-tune it. You usually pick a small dataset of few hundreds-thousands of samples. You then pass it to the model and train it on it. This is called fine-tuning. The idea is to end with a model that has a strong understanding of a specific task. For example, you can fine-tune a model with your tweets to make it generate tweets like you! (but please don’t). You can fine-tune many models in your gaming laptop! Examples of fine-tuned models are ChatGPT, Vicuna, and Mistral Instruct.</p>
+<p>8.1 <strong>Mistral 7B Instruct:</strong> A fine-tuned version of Mistral 7B.</p>
+<p>8.2 <strong>Vicuna:</strong> A cute animal that is also a fine-tuned model. It begins from LLaMA-13B and is fine-tuned on user conversations with ChatGPT.</p>
+<p>8.3 <strong>Number of parameters:</strong> Notice the <code>-13B</code> in point 8.2. That’s the number of parameters in a model. Each parameter is a number (with certain precision), and is part of the model. The parameters are learned during pre-training and fine-tuning to minimize the error.</p>
+<p><img src="gpu_poor.png" class="img-fluid"></p></li>
+<li><p><strong>Prompt:</strong> A few words that you give to the model to start generating text. For example, if you want to generate a poem, you can give the model the first line of the poem as a prompt. The model will then generate the rest of the poem!</p></li>
+<li><p><strong>Zero-shot:</strong> A type of prompt that is used to generate text without fine-tuning. The model is not trained on any specific task. It is only trained on a large dataset of text. For example, you can give the model the first line of a poem and ask it to generate the rest of the poem. The model will do its best to generate a poem, even though it has never seen a poem before! When you use ChatGPT, you often do zero-shot generation!</p>
+<pre><code>User: Write a poem about a llama
+_______________
+Model:
+Graceful llama, in Andean air,
+Elegant stride, woolly flair.
+Mountains echo, mystic charm,
+Llama's gaze, a tranquil balm.</code></pre></li>
+<li><p><strong>Few-shot:</strong> A type of prompt that is used to generate text with fine-tuning. We provide a couple of examples to the model. This can improve the quality a lot!</p>
+<pre><code>User
+Input:
+
+Text: "The cat sat on the mat."
+Label: Sentence about an animal.
+
+Text: "The sun is incredibly bright today."
+Label: Sentence about weather.
+
+Classification Task:
+Classify the following text - "Rainy days make me want to stay in bed."
+
+Output:
+Label: Sentence about weather.
+
+Text: "Rainy days make me want to stay in bed."
+__________________
+Model
+Label: Sentence about weather.</code></pre></li>
+<li><p><strong>Instruct-tuning:</strong> A type of fine-tuning that uses instructions to generate text ending in more controlled behavor in generating responses or performing tasks.</p>
+<p>12.1 <strong>Alpaca:</strong> A dataset of 52,000 instructions generatd with OpenAI APIs. It kicked off a big wave of people using OpenAI to generate synthetic data for instruct-tuning. It costed about $500 to generate.</p>
+<p>12.2 <strong>LIMA:</strong> A model that demonstrates strong performance with very few examples. It demonstrates that adding more data does not always correlate with better quality.</p></li>
+<li><p><strong>RLHF (Reinforcement Learning with Human Feedback):</strong> A type of fine-tuning that uses reinforcement learning (RL) and human-generated feedback. Thanks to the introduction of human feedback, the end model ends up being very good for things such as conversations! It kicks off with a base model that generates bunch of conversations. Humans then rate the answers (preferences). The preferences are used to train a Reward Model that generates a score for a given text. Using Reinforcement Learning, the initial LM is trained to maximize the score generated by the Reward Model. Read more about it <a href="https://huggingface.co/blog/rlhf">here</a>.</p>
+<p>13.1 <strong>RL:</strong> Reinforcement learning is a type of machine learning that uses rewards to train a model. For example, you can train a model to play a game by giving it a reward when it wins and a punishment when it loses. The model will learn to win the game!</p>
+<p>13.2. <strong>Reward Model:</strong> A model that is used to generate rewards. For example, you can train a model to generate rewards for a game. The model will learn to generate rewards that are good for the game!</p>
+<p>13.3 <strong>ChatGPT:</strong> RLHF-finetuned GPT-3 model that is very good at conversations.</p>
+<p>13.4 <strong>AIF</strong>: An alternative to human feedback…AI Feedback!</p></li>
+<li><p><strong>PPO:</strong> A type of reinforcement learning algorithm that is used to train a model. It is used in RLHF.</p></li>
+<li><p><strong>DPO:</strong> A type of training which removes the need for a reward model. It simplifies significantly the RLHF-pipeline.</p>
+<p>15.1 <strong>Zephyr:</strong> A 7B Mistral-based model trained with DPO. It has similar capabilities to the Llama 2 Chat model of 70B parameters. It came out with a nice <a href="https://github.com/huggingface/alignment-handbook/tree/main">handbook of recipes</a>.</p>
+<p>15.2 <strong>Notus:</strong> A trained variation of Zephyr but with better filered and fixed data. It does better!</p>
+<p>15.3 <strong>Overfitting:</strong> occurs in ML when a model learns the training data too well, capturing noise and specific patterns that do not generalize to new, unseen data, leading to poor performance on real-world tasks.</p>
+<p>15.4 <strong>DPO Overfits</strong> Although DPO shows overfitting behaviors after one behavior, it does not harm downstream performance on chat evaluations. Did your ML teachers lie to us when they said overfitting was bad?</p>
+<p>15.5 <strong>IPO:</strong> A change in the DPO objective which is simpler and less prone to overfitting.</p>
+<p>15.6. <strong>KTO:</strong> While PPO, DPO, and IPO require pairs of accepted vs rejected generations, KTO just needs a binary label (accepted or rejected), hence allowing to scale to much more data.</p>
+<p>15.7 <strong>trl:</strong> A library that allows to train models with DPO, IPO, KTO, and more!</p></li>
+<li><p><strong>Open LLM Leaderboard:</strong> A <a href="https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard">leaderboard</a> where you can find benchmark results for many open-access LLMs.</p>
+<p>17.1 <strong>Benchmark:</strong> A benchmark is a test that you run to compare different models. For example, you can run a benchmark to compare the performance of different models on a specific task.</p>
+<p>17.2 <strong>TruthfulQA:</strong> A not-great benchmark to measure a model’s ability to generate truthful answers.</p>
+<p>17.3 <strong>Conversational models:</strong> The LLM Leaderboard should be mostly to compare base models, not as much for conversational models. It still provides some useful signal about the conversational models, but this should not be the final way to evaluate them.</p>
+<p><img src="benchmark.png" class="img-fluid"></p></li>
+<li><p><strong>Chatbot Arena:</strong> A popopular <a href="https://lmsys.org/blog/2023-05-03-arena/">crowd-sourced open benchmark</a> of human preferences. <strong>It’s good to compare conversational models</strong></p>
+<p><img src="chatbot_arena.png" class="img-fluid"></p></li>
+<li><p><strong>MT-Bench:</strong> A multi-turn benchmark of 160 questions across eight domains. Each response is evaluated by GPT-4. (This presents limitations…what happens if the model is better than GPT-4?)</p></li>
+<li><p><strong>Mixture-of-Experts (MoE):</strong> A model architecture in which some of the (dense) layers are replaced with a set of experts. Each expert is a small neural network. There is a small network, router, that decides which expert to use for each token (read more <a href="https://huggingface.co/blog/moe">here</a>). Clarifications:</p>
+<ul>
+<li>A MoE is not an ensemble.</li>
+<li>If we say a MoE has 8 experts, it means each replaced dense layer is replaced with 8 experts. If there were 3 replaced layers, then there are 24 experts in total!</li>
+<li>We can activate multiple experts at the same time. For a given sentence, “hello world”, “hello might be sent to experts 1 and 2 while”world” to 2 and 4.</li>
+<li>The experts in a MoE do not specialize in a task. They are all trained on the same task, they just get different tokens! Sometimes they do specialize in certain types of tokens, as shown in this table from the ST-MoE paper.</li>
+</ul>
+<p><img src="moe.png" class="img-fluid"></p>
+<p>19.1 <strong>GPT-4:</strong> A kinda good model, but we don’t know what it is. The rumors say it’s a MoE.</p>
+<p>19.2 <strong>Mixtral:</strong> A MoE model released by Mistral. It has 47B parameters but only 12B parameters are used at a time, making it very efficient.</p></li>
+<li><p><strong>Model Merging:</strong> A technique that allows us to combine multiple models of the same architecture into a single model. Read more <a href="https://huggingface.co/blog/mlabonne/merge-models">here</a>.</p>
+<p>20.1 <strong>Mergekit:</strong> A cool open-source tool to quickly merge repos.</p>
+<p>20.2 <strong>Averaging:</strong> The most basic merging technique. Pick two models, average their weights. Somehow it kinda works!</p>
+<p>20.3 <strong>Frankenmerge:</strong> It allows to concatenate layers from different LLMs, allowing you to do crazy things.</p>
+<p>20.4 <strong>Goliath-120B:</strong> A frankenmerge that combines two Llama 70B models to achieve a 120B model</p>
+<p>20.5 <strong>MoE Merging:</strong> (Not 100% about this one) Experimental branch in <code>mergekit</code> that allows building a MoE-like model combining different models. You specify which models and which types of prompts you want each expert to handle, hence ending with expert task-specialization.</p>
+<p>20.6 <strong>Phixtral:</strong> A MoE merge of Phi 2 DPO and Dolphin 2 Phi 2.</p>
+<p><img src="merge.jpeg" class="img-fluid"></p></li>
+<li><p><strong>Local LLMs:</strong> If we have models small enough, we can run them in our computers or even our phones!</p>
+<p>21.1 <strong>TinyLlama:</strong> A project to pre-train a 1.1B Llama model on 3 trillion tokens.</p>
+<p>21.2 <strong>Cognitive Computations:</strong> A community (led by Eric Hartford) that is fine-tuning a bunch of models</p>
+<p>21.3 <strong>Uncensored models:</strong> Many models have some strong alignment that prevent doing things such as asking Llama to kill a Linux process. Training uncensored models aims to remove specific biases engrained in the decision-making process of fine-tuning a model. Read more <a href="https://erichartford.com/uncensored-models">here</a>.</p>
+<p><img src="process.png" class="img-fluid"></p>
+<p>21.4 <strong>llama.cpp:</strong> A tool to use Llama-like models in C++.</p>
+<p>21.5 <strong>GGUF:</strong> A format introduced by llama.cpp to store models. It replaces the old file format, GGML.</p>
+<p>21.6 <strong>ggml:</strong> Tensor library in ML, allowing projects such as llama.cpp and whisper.cpp (not the same as GGML, the file format).</p>
+<p>21.7 <strong>Georgi Gerganov:</strong> The creator of llama.cpp and ggml!</p>
+<p>21.8 <strong>Whisper:</strong> The state-of-the-art speech-to-text open source model.</p>
+<p>21.9 <strong>OpenAI:</strong> A company that does closed source AI. (kidding, they open-sourced Whisper!)</p>
+<p>21.10 <strong>MLX:</strong> A new framework for Apple devices that allows easy inference and fine-tuning of models.</p></li>
+<li><ol type="A">
+<li><strong>Local LLM tools:</strong> If you don’t know how to code, there are a couple of tools that can be useful</li>
+</ol>
+<p>22.1 <strong>Oobabooga:</strong> A simple web app that allows you to use models without coding. It’s very easy to use!</p>
+<p>22.2 <strong>LM Studio:</strong> A nice advanced app that runs models on your laptop, entirely offline.</p>
+<p>22.3 <strong>ollama:</strong> An open-source tool to run LLMs locally. There are multiple web/desktop apps and terminal integrations on top of it.</p>
+<p>22.4 <strong>ChatUI:</strong> An open-source UI to use open-source models.</p></li>
+<li><p><strong>Quantization:</strong> A technique that allows us to reduce the size of a model. It is done by reducing the precision of the model’s weights. For example, we can reduce the precision from 32 bits to 8 bits. This reduces the size of the model by 4 times! The model will (sometimes) be less accurate but it will be much smaller. This allows us to run the model on smaller devices such as phones.</p>
+<p>23.1 <strong>TheBloke:</strong> A bloke that quantizes models. As soon as a model is out, he quantizes it! See their <a href="https://huggingface.co/TheBloke">HF Profile</a>.</p>
+<p><img src="thebloke.png" class="img-fluid"></p>
+<p>23.2 <strong>Hugging Face:</strong> A platform to find and share open-acces models, datasets, and demos. It’s also a company that has built different OS libraries (and where I work!)</p>
+<p>23.3. <strong>Facehugger:</strong> A monster from the Alien movie. It should also be an open source tool. It’s not yet.</p>
+<p>23.4. <strong>GPTQ:</strong> A popular quantization technique.</p>
+<p>23.5 <strong>AWQ:</strong> Another popular quantization technique.</p>
+<p>23.6 <strong>EXL2:</strong> A different quantization format used by a library called exllamav2 (among many others)</p>
+<p>23.7 <strong>LASER:</strong> A technique that reduces the size of the model and increases its performance by reducindg the rank of specific matrices. It requires no additional training.</p></li>
+<li><p><strong>PEFT:</strong> Parameter-Efficient Fine-Tuning - It’s a family of methods that allow fine-tuning models without modifying all the parameters. Usually, you freeze the model, add a small set of parameters, and just modify it. It hence reduces the amount of compute required and you can achieve very good results!</p>
+<p>24.1 <strong>peft:</strong> A popular OS library to do PEFT! It’s used in other projects such as <code>trl</code>.</p>
+<p>24.2 <strong>adapters:</strong> Another popular library to do PEFT.</p>
+<p>24.3.<strong>unsloth</strong>: A higher-level library to do PEFT (using QLoRA)</p>
+<p>24.4. <strong>LoRA:</strong> One of the most popular PEFT techniques. It adds low-rank “update matrices”. The base model is frozen and only the update matrices are trained. This can be used for image classification, teaching Stable Diffusion the concept of your pet, or LLM fine-tuning.</p></li>
+<li><p><strong>QLoRA:</strong> A technique that combines LoRAs with quantization, hence we use 4-bit quantization and only update the LoRA parameters! This allows fine-tuning models with very GPU-poor GPUs.</p>
+<p>25.1. <strong>Tim Dettmers:</strong> A researcher that has done a lot of work on PEFT and created QLoRA.</p>
+<p>25.2. <strong>Guanaco (model):</strong> A LLaMA fine-tune using QLoRA tuning.</p>
+<p><img src="qlora.png" class="img-fluid"></p></li>
+<li><p><strong>axolotl:</strong> A cute animal that is also a high-level tool to streamline fine-tuning, including support for things such as QLoRA.</p></li>
+<li><p><strong>Nous Research</strong>: An open-source Discord community turned company that releases bunch of cool models.</p></li>
+<li><p><strong>Multimodal:</strong> A single model that can handle multiple modalities. For example, a model that can generate text and images at the same time. Or a model that can generate text and audio at the same time. Or a model that can generate text, images, and audio at the same time. Or a model that can generate text, images, audio, video, smells, tastes, feelings, thoughts, dreams, memories, consciousness, souls, universes, gods, multiverses, and omniverses at the same time. (thanks ChatGPT for your hallucination)</p>
+<p>28.1 <strong>Hallucination:</strong> When a model cangenerates responses that may be coherent but are not actually accurate, leading to the creation of misinformation or imaginary scenarios…such as the one above!</p>
+<p>28.2 <strong>LlaVA:</strong> A multimodal model that can receive images and text as input and generate text respones.</p></li>
+<li><p><strong>Bagel:</strong> A process which mixes a bunch of supervised fine-tuning and preference data. It uses different prompt formats, making the model more versatile to all kinds of prompts.</p></li>
+<li><p><strong>Code Models:</strong> LLMs that are specifically pre-trained for code.</p>
+<p>30.1. <strong>Big Code Models Leaderboard:</strong> A <a href="https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard">leaderboard</a> to compare code models in the HumanEval dataset.</p>
+<p>30.2. <strong>HumanEval:</strong> A very small dataset of 164 Python programming problems. It is translated to 18 programming languages in MultiPL-E.</p>
+<p>30.3 <strong>BigCode:</strong> An open scientific collaboration working in code-related models and datasets.</p>
+<p><img src="bigcode.jpeg" class="img-fluid"></p>
+<p>30.4 <strong>The Stack:</strong> A dataset of 6.4TB of permissible-licensed code data covering 358 programming languages.</p>
+<p>30.5 <strong>Code Llama:</strong> The best base code model. It’s based on Llama 2.</p>
+<p><img src="codellama.jpeg" class="img-fluid"></p>
+<p>30.6 <strong>WizardLM:</strong> A research team from Microsoft…but also a Discord community.</p>
+<p>30.7 <strong>WizardCoder:</strong> A code model released by WizardLM. Its architecture is based on Llama</p></li>
+<li><p><strong>Flash Attention:</strong> An approximate attention algorithm which provides a huge speedup.</p>
+<p>31.1 <strong>Flash Attention 2:</strong> An upgrade to the flash attention algorithm that provides even more speedup.</p>
+<p>31.2. <strong>Tri Dao:</strong> The author of both techniques and a legend in the ecosystem.</p></li>
+</ol>
+<p>I hope you enjoyed this read! Feel free to suggest new terms or corrections in the comments below. I’ll keep updating this post as new terms come up.</p>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/osanseviero\.github\.io\/hackerllama");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="osanseviero/hackerllama" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-01-20">
+<meta name="description" content="Deep Dive into Cross-encoders and Re-ranking">
+
+<title>Sentence Embeddings. Cross-encoders and Re-ranking – hackerllama</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../../hacker.png" rel="icon" type="image/png">
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b758ccaa5987ceb1b75504551e579abf.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-7f54657f98cfd61baa5fc740dde4b5a5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-SF72633X8L"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-SF72633X8L', { 'anonymize_ip': true});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+<meta property="og:title" content="Sentence Embeddings. Cross-encoders and Re-ranking – hackerllama">
+<meta property="og:description" content="Deep Dive into Cross-encoders and Re-ranking">
+<meta property="og:image" content="https://osanseviero.github.io/hackerllama/blog/posts/sentence_embeddings2/cross_encoder.png">
+<meta property="og:site_name" content="hackerllama">
+<meta property="og:image:height" content="900">
+<meta property="og:image:width" content="1600">
+<meta name="twitter:title" content="Sentence Embeddings. Cross-encoders and Re-ranking – hackerllama">
+<meta name="twitter:description" content="Deep Dive into Cross-encoders and Re-ranking">
+<meta name="twitter:image" content="https://osanseviero.github.io/hackerllama/blog/posts/sentence_embeddings2/cross_encoder.png">
+<meta name="twitter:image-height" content="900">
+<meta name="twitter:image-width" content="1600">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">hackerllama</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../resources.html"> 
+<span class="menu-text">Misc Resources</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/osanseviero"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/omarsanseviero/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/osanseviero"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../../blog/index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
+  <li><a href="#intro" id="toc-intro" class="nav-link" data-scroll-target="#intro">Intro</a></li>
+  <li><a href="#cross-encoders" id="toc-cross-encoders" class="nav-link" data-scroll-target="#cross-encoders">Cross-encoders</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  <li><a href="#retrieve-and-re-rank" id="toc-retrieve-and-re-rank" class="nav-link" data-scroll-target="#retrieve-and-re-rank">Retrieve and re-rank</a></li>
+  <li><a href="#aside-specter2" id="toc-aside-specter2" class="nav-link" data-scroll-target="#aside-specter2">Aside: SPECTER2</a></li>
+  <li><a href="#aside-augmented-sbert" id="toc-aside-augmented-sbert" class="nav-link" data-scroll-target="#aside-augmented-sbert">Aside: Augmented SBERT</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#knowledge-check" id="toc-knowledge-check" class="nav-link" data-scroll-target="#knowledge-check">Knowledge Check</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Sentence Embeddings. Cross-encoders and Re-ranking</h1>
+</div>
+
+<div>
+  <div class="description">
+    Deep Dive into Cross-encoders and Re-ranking
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 20, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p><a href="https://colab.research.google.com/github/osanseviero/hackerllama/blob/main/nbs/blog/posts/sentence_embeddings2/index.ipynb" rel="nofollow" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
+<p>This series aims to demystify embeddings and show you how to use them in your projects. The <a href="../../../blog/posts/sentence_embeddings">first blog post</a> taught you how to use and scale up open-source embedding models, pick an existing model, current evaluation methods, and the state of the ecosystem. This second blog post will dive deeper into embeddings and explain the differences between bi-encoders and cross-encoders. Then, we’ll dive into <strong>retrieving and re-ranking</strong>: we’ll build a tool to answer questions about 400 AI papers. We’ll briefly discuss about two different papers at the end. Enjoy!</p>
+<p>You can either read the content here or execute it in Google Colab by clicking the badge at the top of the page. Let’s dive into embeddings!</p>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>Sentence Transformers supports two types of models: Bi-encoders and Cross-encoders. Bi-encoders are faster and more scalable, but cross-encoders are more accurate. Although both tackle similar high-level tasks, when to use one versus the other is quite different. Bi-encoders are better for search, and cross-encoders are better for classification and high-accuracy ranking. Let’s dive into the details!</p>
+</section>
+<section id="intro" class="level2">
+<h2 class="anchored" data-anchor-id="intro">Intro</h2>
+<p>All the models we saw in the previous blog post were bi-encoders. Bi-encoders are models that encode the input text into a fixed-length vector. When you compute the similarity between two sentences, we usually encode the two sentences into two vectors and then compute the similarity between the two vectors (e.g., by using cosine similarity). We train bi-encoders to optimize the increase in the similarity between the query and relevant sentences and decrease the similarity between the query and the other sentences. This is why bi-encoders are better suited for search. As the previous blog post showed, bi-encoders are fast and easily scalable. If multiple sentences are provided, the bi-encoder will encode each sentence independently. This means that the sentence embeddings are independent of each other. This is a good thing for search, as we can encode millions of sentences in parallel. However, this also means that the bi-encoder doesn’t know anything about the relationship between the sentences.</p>
+<p>When we use cross-encoders, we do something different. Cross-encoders encode the two sentences simultaneously and then output a classification score. The figure below shows the high-level differences</p>
+<p><img src="cross_encoder.png" class="img-fluid"></p>
+<p>Why would you use one versus the other? Cross-encoders are slower and more memory intensive but also much more accurate. A cross-encoder is an excellent choice to compare a few dozen sentences. If you want to compare hundreds of thousands of sentences, a bi-encoder is a better choice, as otherwise a cross-encoder could take multiple hours. What if you care about accuracy and want to compare thousands of sentences efficiently? This is a typical case when you want to retrieve information. In those cases, an option is first to use a bi-encoder to reduce the number of candidates (i.e., get the top 20 most relevant examples) and then use a cross-encoder to get the final result. This is called re-ranking and is a common technique in information retrieval; we’ll learn more about it later in this blog post!</p>
+<p>Given that the cross-encoder is more accurate, it’s also a good option for tasks where subtle differences matter, such as medical or legal documents where a slight difference in wording can change the sentence’s meaning.</p>
+</section>
+<section id="cross-encoders" class="level2">
+<h2 class="anchored" data-anchor-id="cross-encoders">Cross-encoders</h2>
+<p>As mentioned, cross-encoders encode two texts simultaneously and then output a classification label. The cross-encoder first generates a single embedding that captures representations and their relationships. Compared to bi-encoder-generated embeddings (which are independent of each other), cross-encoder embeddings are dependent on each other. This is why cross-encoders are better suited for classification, and their quality is higher: they can capture the relationship between the two sentences! On the flip side, cross-encoders are slow if you need to compare thousands of sentences since they need to encode all the sentence pairs.</p>
+<p>Let’s say you have four sentences, and you need to compare all the possible pairs:</p>
+<ul>
+<li>A bi-encoder would need to encode each sentence independently, so it would need to encode four sentences.</li>
+<li>A cross-encoder would need to encode all the possible pairs, so it would need to encode six sentences (AB, AC, AD, BC, BD, CD).</li>
+</ul>
+<p>Let’s scale this. Let’s say you have 100,000 sentences, and you need to compare all the possible pairs:</p>
+<ul>
+<li>A bi-encoder would encode 100,000 sentences.</li>
+<li>A cross-encoder would encode 4,999,950,000 pairs! (Using the <a href="https://en.wikipedia.org/wiki/Binomial_coefficient">combinations formula</a>: <code>n! / (r!(n-r)!)</code>, where n=100,000 and r=2). No wonder they don’t scale well!</li>
+</ul>
+<p>Hence, it makes sense they are slower!</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Although cross-encoders have an intermediate embedding before the classification layer, it is not used for similarity search. This is because the cross-encoder is trained to optimize the classification loss, not the similarity loss. Hence, the embedding is specific to the classification task and not the similarity task.</p>
+</div>
+</div>
+<p>They can be used for different tasks. For example, for passage retrieval (given a question and a passage, is the passage relevant to the question?). Let’s look at a quick code snippet with a small cross-encoder model trained for this:</p>
+<div id="1ca1bf81" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install sentence_transformers datasets</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="ea545e99" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> CrossEncoder</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> CrossEncoder(<span class="st">'cross-encoder/ms-marco-TinyBERT-L-2-v2'</span>, max_length<span class="op">=</span><span class="dv">512</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> model.predict([(<span class="st">'How many people live in Berlin?'</span>, <span class="st">'Berlin had a population of 3,520,031 registered inhabitants in an area of 891.82 square kilometers.'</span>), </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                        (<span class="st">'How many people live in Berlin?'</span>, <span class="st">'Berlin is well known for its museums.'</span>)])</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([ 7.152365 , -6.2870445], dtype=float32)</code></pre>
+</div>
+</div>
+<p>Another use case, more similar to what we did with bi-encoders, is to use cross-encoders for semantic similarity. For example, given two sentences, are they semantically similar? Although this is the same task we solved with bi-encoders, remember that cross-encoders are more accurate but slower.</p>
+<div id="6eadf6aa" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> CrossEncoder(<span class="st">'cross-encoder/stsb-TinyBERT-L-4'</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> model.predict([(<span class="st">"The weather today is beautiful"</span>, <span class="st">"It's raining!"</span>), </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                        (<span class="st">"The weather today is beautiful"</span>, <span class="st">"Today is a sunny day"</span>)])</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([0.46552283, 0.6350213 ], dtype=float32)</code></pre>
+</div>
+</div>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
+</section>
+<section id="retrieve-and-re-rank" class="level2">
+<h2 class="anchored" data-anchor-id="retrieve-and-re-rank">Retrieve and re-rank</h2>
+<p>Now that we have learned about the differences between cross-encoders and bi-encoders, let’s see how we can use them in practice by doing a two-stage retrieval and re-ranking system. This is a common technique in information retrieval, where you first retrieve the most relevant documents and then re-rank them using a more accurate model. This is a good option for comparing thousands of sentences efficiently and caring about accuracy.</p>
+<p>Suppose you have a corpus of 100,000 sentences and want to find the most relevant sentences to a given query. The first step is to use a bi-encoder to retrieve many candidates (to ensure recall). Then, you use a cross-encoder to re-rank the candidates and get the final result with high precision. This is a high-level overview of how the system would look like</p>
+<p><img src="rerank.png" class="img-fluid"></p>
+<p>Let’s try our luck by implementing a paper search system! We’ll use a <a href="https://huggingface.co/datasets/jamescalam/ai-arxiv-chunked">AI Arxiv Dataset</a> in an excellent tutorial from <a href="https://www.pinecone.io/learn/series/rag/rerankers/">Pinecone</a> about rerankers. The goal is to be able to ask AI questions and get relevant paper sections to answer the questions.</p>
+<div id="9f5f3303" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"jamescalam/ai-arxiv-chunked"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dataset[<span class="st">"train"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Found cached dataset json (/home/osanseviero/.cache/huggingface/datasets/jamescalam___json/jamescalam--ai-arxiv-chunked-0d76bdc6812ffd50/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"42fbf9c02f2b4e6eb8cdf016446b66ee","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Dataset({
+    features: ['doi', 'chunk-id', 'chunk', 'id', 'title', 'summary', 'source', 'authors', 'categories', 'comment', 'journal_ref', 'primary_category', 'published', 'updated', 'references'],
+    num_rows: 41584
+})</code></pre>
+</div>
+</div>
+<p>If you look at the dataset, it’s a chunked dataset of 400 Arxiv papers. Chunked means that sections are split into chunks/pieces of fewer tokens to make things more manageable for the model. Here is a sample:</p>
+<div id="8b021968" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dataset[<span class="st">"train"</span>][<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'doi': '1910.01108',
+ 'chunk-id': '0',
+ 'chunk': 'DistilBERT, a distilled version of BERT: smaller,\nfaster, cheaper and lighter\nVictor SANH, Lysandre DEBUT, Julien CHAUMOND, Thomas WOLF\nHugging Face\n{victor,lysandre,julien,thomas}@huggingface.co\nAbstract\nAs Transfer Learning from large-scale pre-trained models becomes more prevalent\nin Natural Language Processing (NLP), operating these large models in on-theedge and/or under constrained computational training or inference budgets remains\nchallenging. In this work, we propose a method to pre-train a smaller generalpurpose language representation model, called DistilBERT, which can then be ﬁnetuned with good performances on a wide range of tasks like its larger counterparts.\nWhile most prior work investigated the use of distillation for building task-speciﬁc\nmodels, we leverage knowledge distillation during the pre-training phase and show\nthat it is possible to reduce the size of a BERT model by 40%, while retaining 97%\nof its language understanding capabilities and being 60% faster. To leverage the\ninductive biases learned by larger models during pre-training, we introduce a triple\nloss combining language modeling, distillation and cosine-distance losses. Our\nsmaller, faster and lighter model is cheaper to pre-train and we demonstrate its',
+ 'id': '1910.01108',
+ 'title': 'DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter',
+ 'summary': 'As Transfer Learning from large-scale pre-trained models becomes more\nprevalent in Natural Language Processing (NLP), operating these large models in\non-the-edge and/or under constrained computational training or inference\nbudgets remains challenging. In this work, we propose a method to pre-train a\nsmaller general-purpose language representation model, called DistilBERT, which\ncan then be fine-tuned with good performances on a wide range of tasks like its\nlarger counterparts. While most prior work investigated the use of distillation\nfor building task-specific models, we leverage knowledge distillation during\nthe pre-training phase and show that it is possible to reduce the size of a\nBERT model by 40%, while retaining 97% of its language understanding\ncapabilities and being 60% faster. To leverage the inductive biases learned by\nlarger models during pre-training, we introduce a triple loss combining\nlanguage modeling, distillation and cosine-distance losses. Our smaller, faster\nand lighter model is cheaper to pre-train and we demonstrate its capabilities\nfor on-device computations in a proof-of-concept experiment and a comparative\non-device study.',
+ 'source': 'http://arxiv.org/pdf/1910.01108',
+ 'authors': ['Victor Sanh',
+  'Lysandre Debut',
+  'Julien Chaumond',
+  'Thomas Wolf'],
+ 'categories': ['cs.CL'],
+ 'comment': 'February 2020 - Revision: fix bug in evaluation metrics, updated\n  metrics, argumentation unchanged. 5 pages, 1 figure, 4 tables. Accepted at\n  the 5th Workshop on Energy Efficient Machine Learning and Cognitive Computing\n  - NeurIPS 2019',
+ 'journal_ref': None,
+ 'primary_category': 'cs.CL',
+ 'published': '20191002',
+ 'updated': '20200301',
+ 'references': [{'id': '1910.01108'}]}</code></pre>
+</div>
+</div>
+<p>Let’s get all the chunks, which we’ll encode:</p>
+<div id="c9f21699" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>chunks <span class="op">=</span> dataset[<span class="st">"train"</span>][<span class="st">"chunk"</span>] </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(chunks)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>41584</code></pre>
+</div>
+</div>
+<p>Now, we’ll use a bi-encoder to encode all the chunks into embeddings. We’ll truncate long passages to 512 tokens. Note that short context is one of the downsides of many embedding models! We’ll specifically use the <a href="https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1">multi-qa-MiniLM-L6-cos-v1</a> model, which is a small-sized model trained to encoder questions and passages into a similar embedding space. This model is a bi-encoder, so it’s fast and scalable.</p>
+<p>Embedding all the 40,000+ passages takes around 30 seconds on my not-particularly special computer. Please note that we only need to generate the embeddings of the passages once, as we can save them to disk and load them later. In a production setting, you can save the embeddings to a database and load from there.</p>
+<div id="eb392295" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>bi_encoder <span class="op">=</span> SentenceTransformer(<span class="st">'multi-qa-MiniLM-L6-cos-v1'</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>bi_encoder.max_seq_length <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>corpus_embeddings <span class="op">=</span> bi_encoder.encode(chunks, convert_to_tensor<span class="op">=</span><span class="va">True</span>, show_progress_bar<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"ee4a179b62044f97a4b7dcaf7c4c6d5e","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<p>Awesome! Now, let’s provide a question and search for the relevant passage. To do this, we need to encode the question and then compute the similarity between the question and all the passages. Let’s do this and look at the top hits!</p>
+<div id="d688435a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> util</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"what is rlhf?"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>top_k <span class="op">=</span> <span class="dv">25</span> <span class="co"># how many chunks to retrieve</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> bi_encoder.encode(query, convert_to_tensor<span class="op">=</span><span class="va">True</span>).cuda()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>hits <span class="op">=</span> util.semantic_search(query_embedding, corpus_embeddings, top_k<span class="op">=</span>top_k)[<span class="dv">0</span>]</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>hits</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>[{'corpus_id': 14679, 'score': 0.6097552180290222},
+ {'corpus_id': 17387, 'score': 0.5659530162811279},
+ {'corpus_id': 39564, 'score': 0.5590510368347168},
+ {'corpus_id': 14725, 'score': 0.5585878491401672},
+ {'corpus_id': 5628, 'score': 0.5296251773834229},
+ {'corpus_id': 14802, 'score': 0.5075011253356934},
+ {'corpus_id': 9761, 'score': 0.49943411350250244},
+ {'corpus_id': 14716, 'score': 0.4931946098804474},
+ {'corpus_id': 9763, 'score': 0.49280521273612976},
+ {'corpus_id': 20638, 'score': 0.4884325861930847},
+ {'corpus_id': 20653, 'score': 0.4873950183391571},
+ {'corpus_id': 9755, 'score': 0.48562008142471313},
+ {'corpus_id': 14806, 'score': 0.4792214035987854},
+ {'corpus_id': 14805, 'score': 0.475425660610199},
+ {'corpus_id': 20652, 'score': 0.4740477204322815},
+ {'corpus_id': 20711, 'score': 0.4703512489795685},
+ {'corpus_id': 20632, 'score': 0.4695567488670349},
+ {'corpus_id': 14750, 'score': 0.46810320019721985},
+ {'corpus_id': 14749, 'score': 0.46809980273246765},
+ {'corpus_id': 35209, 'score': 0.46695172786712646},
+ {'corpus_id': 14671, 'score': 0.46657535433769226},
+ {'corpus_id': 14821, 'score': 0.4637290835380554},
+ {'corpus_id': 14751, 'score': 0.4585301876068115},
+ {'corpus_id': 14815, 'score': 0.45775431394577026},
+ {'corpus_id': 35250, 'score': 0.4569615125656128}]</code></pre>
+</div>
+</div>
+<div id="02eb7295" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Let's store the IDs for later</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>retrieval_corpus_ids <span class="op">=</span> [hit[<span class="st">'corpus_id'</span>] <span class="cf">for</span> hit <span class="kw">in</span> hits]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Now let's print the top 3 results</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, hit <span class="kw">in</span> <span class="bu">enumerate</span>(hits[:<span class="dv">3</span>]):</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> dataset[<span class="st">"train"</span>][hit[<span class="st">"corpus_id"</span>]]</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Top </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss"> passage with score </span><span class="sc">{</span>hit[<span class="st">'score'</span>]<span class="sc">}</span><span class="ss"> from </span><span class="sc">{</span>sample[<span class="st">'source'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(sample[<span class="st">"chunk"</span>])</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top 1 passage with score 0.6097552180290222 from http://arxiv.org/pdf/2204.05862:
+learning from human feedback, which we improve on a roughly weekly cadence. See Section 2.3.
+4This means that our helpfulness dataset goes ‘up’ in desirability during the conversation, while our harmlessness
+dataset goes ‘down’ in desirability. We chose the latter to thoroughly explore bad behavior, but it is likely not ideal
+for teaching good behavior. We believe this difference in our data distributions creates subtle problems for RLHF, and
+suggest that others who want to use RLHF to train safer models consider the analysis in Section 4.4.
+5
+1071081091010
+Number of Parameters0.20.30.40.50.6Mean Eval Acc
+Mean Zero-Shot Accuracy
+Plain Language Model
+RLHF
+1071081091010
+Number of Parameters0.20.30.40.50.60.7Mean Eval Acc
+Mean Few-Shot Accuracy
+Plain Language Model
+RLHFFigure 3 RLHF model performance on zero-shot and few-shot NLP tasks. For each model size, we plot
+the mean accuracy on MMMLU, Lambada, HellaSwag, OpenBookQA, ARC-Easy, ARC-Challenge, and
+TriviaQA. On zero-shot tasks, RLHF training for helpfulness and harmlessness hurts performance for small
+
+
+Top 2 passage with score 0.5659530162811279 from http://arxiv.org/pdf/2302.07842:
+preferences and values which are diﬃcult to capture by hard- coded reward functions.
+RLHF works by using a pre-trained LM to generate text, which i s then evaluated by humans by, for example,
+ranking two model generations for the same prompt. This data is then collected to learn a reward model
+that predicts a scalar reward given any generated text. The r eward captures human preferences when
+judging model output. Finally, the LM is optimized against s uch reward model using RL policy gradient
+algorithms like PPO ( Schulman et al. ,2017). RLHF can be applied directly on top of a general-purpose LM
+pre-trained via self-supervised learning. However, for mo re complex tasks, the model’s generations may not
+be good enough. In such cases, RLHF is typically applied afte r an initial supervised ﬁne-tuning phase using
+a small number of expert demonstrations for the correspondi ng downstream task ( Ramamurthy et al. ,2022;
+Ouyang et al. ,2022;Stiennon et al. ,2020).
+A successful example of RLHF used to teach a LM to use an extern al tool stems from WebGPT Nakano et al.
+(2021) (discussed in 3.2.3), a model capable of answering questions using a search engine and providing
+
+
+Top 3 passage with score 0.5590510368347168 from http://arxiv.org/pdf/2307.09288:
+31
+5 Discussion
+Here, we discuss the interesting properties we have observed with RLHF (Section 5.1). We then discuss the
+limitations of L/l.sc/a.sc/m.sc/a.sc /two.taboldstyle-C/h.sc/a.sc/t.sc (Section 5.2). Lastly, we present our strategy for responsibly releasing these
+models (Section 5.3).
+5.1 Learnings and Observations
+Our tuning process revealed several interesting results, such as L/l.sc/a.sc/m.sc/a.sc /two.taboldstyle-C/h.sc/a.sc/t.sc ’s abilities to temporally
+organize its knowledge, or to call APIs for external tools.
+SFT (Mix)
+SFT (Annotation)
+RLHF (V1)
+0.0 0.2 0.4 0.6 0.8 1.0
+Reward Model ScoreRLHF (V2)
+Figure 20: Distribution shift for progressive versions of L/l.sc/a.sc/m.sc/a.sc /two.taboldstyle-C/h.sc/a.sc/t.sc , from SFT models towards RLHF.
+Beyond Human Supervision. At the outset of the project, many among us expressed a preference for
+
+</code></pre>
+</div>
+</div>
+<p>Great! We got the most similar chunks according to the high-recall but low-precision bi-encoder.</p>
+<p>Now, let’s re-rank by using a higher-accuracy cross-encoder model. We’ll use the <a href="https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2">cross-encoder/ms-marco-MiniLM-L-6-v2</a> model. This model was trained with the MS MARCO Passage Retrieval dataset, a large dataset with real search questions and their relevant text passages. That makes the model quite suitable for making predictions using questions and passages.</p>
+<p>We’ll use the same question and the top 10 chunks we got from the bi-encoder. Let’s see the results! Recall that cross-encoders expect pairs, so we’ll create pairs of the question and each chunk.</p>
+<div id="639d583c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span>  CrossEncoder</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>cross_encoder <span class="op">=</span> CrossEncoder(<span class="st">'cross-encoder/ms-marco-MiniLM-L-6-v2'</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>cross_inp <span class="op">=</span> [[query, chunks[hit[<span class="st">'corpus_id'</span>]]] <span class="cf">for</span> hit <span class="kw">in</span> hits]</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>cross_scores <span class="op">=</span> cross_encoder.predict(cross_inp)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>cross_scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([ 1.2227577 ,  5.048051  ,  1.2897239 ,  2.205767  ,  4.4136825 ,
+        1.2272772 ,  2.5638275 ,  0.81847703,  2.35553   ,  5.590804  ,
+        1.3877895 ,  2.9497519 ,  1.6762824 ,  0.7211323 ,  0.16303705,
+        1.3640019 ,  2.3106787 ,  1.5849439 ,  2.9696884 , -1.1079378 ,
+        0.7681126 ,  1.5945492 ,  2.2869687 ,  3.5448399 ,  2.056368  ],
+      dtype=float32)</code></pre>
+</div>
+</div>
+<p>Let’s add a new value with the <code>cross-score</code> and sort by it!</p>
+<div id="0224052b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(cross_scores)):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    hits[idx][<span class="st">'cross-score'</span>] <span class="op">=</span> cross_scores[idx]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>hits <span class="op">=</span> <span class="bu">sorted</span>(hits, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="st">'cross-score'</span>], reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>msmarco_l6_corpus_ids <span class="op">=</span> [hit[<span class="st">'corpus_id'</span>] <span class="cf">for</span> hit <span class="kw">in</span> hits] <span class="co"># save for later</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>hits</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>[{'corpus_id': 20638, 'score': 0.4884325861930847, 'cross-score': 5.590804},
+ {'corpus_id': 17387, 'score': 0.5659530162811279, 'cross-score': 5.048051},
+ {'corpus_id': 5628, 'score': 0.5296251773834229, 'cross-score': 4.4136825},
+ {'corpus_id': 14815, 'score': 0.45775431394577026, 'cross-score': 3.5448399},
+ {'corpus_id': 14749, 'score': 0.46809980273246765, 'cross-score': 2.9696884},
+ {'corpus_id': 9755, 'score': 0.48562008142471313, 'cross-score': 2.9497519},
+ {'corpus_id': 9761, 'score': 0.49943411350250244, 'cross-score': 2.5638275},
+ {'corpus_id': 9763, 'score': 0.49280521273612976, 'cross-score': 2.35553},
+ {'corpus_id': 20632, 'score': 0.4695567488670349, 'cross-score': 2.3106787},
+ {'corpus_id': 14751, 'score': 0.4585301876068115, 'cross-score': 2.2869687},
+ {'corpus_id': 14725, 'score': 0.5585878491401672, 'cross-score': 2.205767},
+ {'corpus_id': 35250, 'score': 0.4569615125656128, 'cross-score': 2.056368},
+ {'corpus_id': 14806, 'score': 0.4792214035987854, 'cross-score': 1.6762824},
+ {'corpus_id': 14821, 'score': 0.4637290835380554, 'cross-score': 1.5945492},
+ {'corpus_id': 14750, 'score': 0.46810320019721985, 'cross-score': 1.5849439},
+ {'corpus_id': 20653, 'score': 0.4873950183391571, 'cross-score': 1.3877895},
+ {'corpus_id': 20711, 'score': 0.4703512489795685, 'cross-score': 1.3640019},
+ {'corpus_id': 39564, 'score': 0.5590510368347168, 'cross-score': 1.2897239},
+ {'corpus_id': 14802, 'score': 0.5075011253356934, 'cross-score': 1.2272772},
+ {'corpus_id': 14679, 'score': 0.6097552180290222, 'cross-score': 1.2227577},
+ {'corpus_id': 14716, 'score': 0.4931946098804474, 'cross-score': 0.81847703},
+ {'corpus_id': 14671, 'score': 0.46657535433769226, 'cross-score': 0.7681126},
+ {'corpus_id': 14805, 'score': 0.475425660610199, 'cross-score': 0.7211323},
+ {'corpus_id': 20652, 'score': 0.4740477204322815, 'cross-score': 0.16303705},
+ {'corpus_id': 35209, 'score': 0.46695172786712646, 'cross-score': -1.1079378}]</code></pre>
+</div>
+</div>
+<p>As you can see above, the cross-encoder does not agree as much with the bi-encoder. Surprisingly, some of the top cross-encoder results (14815 and 14749) have the lowest bi-encoder scores. This makes sense - bi-encoders compare the similitude of the question and the documents in the embedding space, while cross-encoders consider the relationship between the question and the document.</p>
+<div id="548cd2de" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, hit <span class="kw">in</span> <span class="bu">enumerate</span>(hits[:<span class="dv">3</span>]):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> dataset[<span class="st">"train"</span>][hit[<span class="st">"corpus_id"</span>]]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Top </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss"> passage with score </span><span class="sc">{</span>hit[<span class="st">'cross-score'</span>]<span class="sc">}</span><span class="ss"> from </span><span class="sc">{</span>sample[<span class="st">'source'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(sample[<span class="st">"chunk"</span>])</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top 1 passage with score 0.9668010473251343 from http://arxiv.org/pdf/2204.05862:
+Stackoverflow Good Answer vs. Bad Answer Loss Difference
+Python FT
+Python FT + RLHF(b)Difference in mean log-prob between good and bad
+answers to Stack Overﬂow questions.
+Figure 37 Analysis of RLHF on language modeling for good and bad Stack Overﬂow answers, over many
+model sizes, ranging from 13M to 52B parameters. Compared to the baseline model (a pre-trained LM
+ﬁnetuned on Python code), the RLHF model is more capable of distinguishing quality (right) , but is worse
+at language modeling (left) .
+the RLHF models obtain worse loss. This is most likely due to optimizing a different objective rather than
+pure language modeling.
+B.8 Further Analysis of RLHF on Code-Model Snapshots
+As discussed in Section 5.3, RLHF improves performance of base code models on code evals. In this appendix, we compare that with simply prompting the base code model with a sample of prompts designed to
+elicit helpfulness, harmlessness, and honesty, which we refer to as ‘HHH’ prompts. In particular, they contain
+a couple of coding examples. Below is a description of what this prompt looks like:
+Below are a series of dialogues between various people and an AI assistant. The AI tries to be helpful,
+
+
+Top 2 passage with score 0.9574587345123291 from http://arxiv.org/pdf/2302.07459:
+We examine the inﬂuence of the amount of RLHF training for two reasons. First, RLHF [13, 57] is an
+increasingly popular technique for reducing harmful behaviors in large language models [3, 21, 52]. Some of
+these models are already deployed [52], so we believe the impact of RLHF deserves further scrutiny. Second,
+previous work shows that the amount of RLHF training can signiﬁcantly change metrics on a wide range of
+personality, political preference, and harm evaluations for a given model size [41]. As a result, it is important
+to control for the amount of RLHF training in the analysis of our experiments.
+3.2 Experiments
+3.2.1 Overview
+We test the effect of natural language instructions on two related but distinct moral phenomena: stereotyping
+and discrimination. Stereotyping involves the use of generalizations about groups in ways that are often
+harmful or undesirable.4To measure stereotyping, we use two well-known stereotyping benchmarks, BBQ
+[40] (§3.2.2) and Windogender [49] (§3.2.3). For discrimination, we focus on whether models make disparate
+decisions about individuals based on protected characteristics that should have no relevance to the outcome.5
+To measure discrimination, we construct a new benchmark to test for the impact of race in a law school course
+
+
+Top 3 passage with score 0.9408788084983826 from http://arxiv.org/pdf/2302.07842:
+preferences and values which are diﬃcult to capture by hard- coded reward functions.
+RLHF works by using a pre-trained LM to generate text, which i s then evaluated by humans by, for example,
+ranking two model generations for the same prompt. This data is then collected to learn a reward model
+that predicts a scalar reward given any generated text. The r eward captures human preferences when
+judging model output. Finally, the LM is optimized against s uch reward model using RL policy gradient
+algorithms like PPO ( Schulman et al. ,2017). RLHF can be applied directly on top of a general-purpose LM
+pre-trained via self-supervised learning. However, for mo re complex tasks, the model’s generations may not
+be good enough. In such cases, RLHF is typically applied afte r an initial supervised ﬁne-tuning phase using
+a small number of expert demonstrations for the correspondi ng downstream task ( Ramamurthy et al. ,2022;
+Ouyang et al. ,2022;Stiennon et al. ,2020).
+A successful example of RLHF used to teach a LM to use an extern al tool stems from WebGPT Nakano et al.
+(2021) (discussed in 3.2.3), a model capable of answering questions using a search engine and providing
+
+</code></pre>
+</div>
+</div>
+<p>Nice! The results seem relevant to the query. What can we do to improve the results?</p>
+<p>Here we used <a href="https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2">cross-encoder/ms-marco-MiniLM-L-6-v2</a>, which is…well..it’s three years old and it’s tiny! It <a href="https://www.sbert.net/docs/pretrained-models/ce-msmarco.html">was</a> one of the best re-ranking models some years ago.</p>
+<p>To pick a model, I suggest going to the <a href="https://huggingface.co/spaces/mteb/leaderboard">MTEB leaderboard</a>, clicking reranking, and selecting a good model that meets your requirements. The average column is a good proxy for general quality, but you might be particularly interested in a dataset (e.g., MSMarco in the retrieval tab).</p>
+<p>Note that some older models, such as MiniLM, are not there. Additionally, not all of these models are cross-encoders, so it’s always important to experiment if adding the second-stage, slower re-ranker is worth it. Here are some that are interesting:</p>
+<ol type="1">
+<li><a href="https://huggingface.co/intfloat/e5-mistral-7b-instruct">E5 Mistral 7B Instruct</a> (Dec 2023): This is a decoder-based embedder (not an encoder-based one as we learned before!). This means the model is massive for most applications (it has 7B params, which is two orders of magnitude higher than MiniLM!). This one is interesting because of the new trend of using decoder models rather than encoders, which could enable working with longer contexts. <a href="https://huggingface.co/papers/2401.00368">Here</a> is the paper.</li>
+<li><a href="https://huggingface.co/BAAI/bge-reranker-base">BAAI Reranker</a> (Sep 2023): A high-quality re-ranking model with a decent size (278M parameters). Let’s get the results with this and compare!</li>
+</ol>
+<div id="3cff5f0e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Same code as before, just different model</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>cross_encoder <span class="op">=</span> CrossEncoder(<span class="st">'BAAI/bge-reranker-base'</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>cross_inp <span class="op">=</span> [[query, chunks[hit[<span class="st">'corpus_id'</span>]]] <span class="cf">for</span> hit <span class="kw">in</span> hits]</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>cross_scores <span class="op">=</span> cross_encoder.predict(cross_inp)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(cross_scores)):</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    hits[idx][<span class="st">'cross-score'</span>] <span class="op">=</span> cross_scores[idx]</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>hits <span class="op">=</span> <span class="bu">sorted</span>(hits, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="st">'cross-score'</span>], reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>bge_corpus_ids <span class="op">=</span> [hit[<span class="st">'corpus_id'</span>] <span class="cf">for</span> hit <span class="kw">in</span> hits]</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, hit <span class="kw">in</span> <span class="bu">enumerate</span>(hits[:<span class="dv">3</span>]):</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> dataset[<span class="st">"train"</span>][hit[<span class="st">"corpus_id"</span>]]</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Top </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss"> passage with score </span><span class="sc">{</span>hit[<span class="st">'cross-score'</span>]<span class="sc">}</span><span class="ss"> from </span><span class="sc">{</span>sample[<span class="st">'source'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(sample[<span class="st">"chunk"</span>])</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top 1 passage with score 0.9668010473251343 from http://arxiv.org/pdf/2204.05862:
+Stackoverflow Good Answer vs. Bad Answer Loss Difference
+Python FT
+Python FT + RLHF(b)Difference in mean log-prob between good and bad
+answers to Stack Overﬂow questions.
+Figure 37 Analysis of RLHF on language modeling for good and bad Stack Overﬂow answers, over many
+model sizes, ranging from 13M to 52B parameters. Compared to the baseline model (a pre-trained LM
+ﬁnetuned on Python code), the RLHF model is more capable of distinguishing quality (right) , but is worse
+at language modeling (left) .
+the RLHF models obtain worse loss. This is most likely due to optimizing a different objective rather than
+pure language modeling.
+B.8 Further Analysis of RLHF on Code-Model Snapshots
+As discussed in Section 5.3, RLHF improves performance of base code models on code evals. In this appendix, we compare that with simply prompting the base code model with a sample of prompts designed to
+elicit helpfulness, harmlessness, and honesty, which we refer to as ‘HHH’ prompts. In particular, they contain
+a couple of coding examples. Below is a description of what this prompt looks like:
+Below are a series of dialogues between various people and an AI assistant. The AI tries to be helpful,
+
+
+Top 2 passage with score 0.9574587345123291 from http://arxiv.org/pdf/2302.07459:
+We examine the inﬂuence of the amount of RLHF training for two reasons. First, RLHF [13, 57] is an
+increasingly popular technique for reducing harmful behaviors in large language models [3, 21, 52]. Some of
+these models are already deployed [52], so we believe the impact of RLHF deserves further scrutiny. Second,
+previous work shows that the amount of RLHF training can signiﬁcantly change metrics on a wide range of
+personality, political preference, and harm evaluations for a given model size [41]. As a result, it is important
+to control for the amount of RLHF training in the analysis of our experiments.
+3.2 Experiments
+3.2.1 Overview
+We test the effect of natural language instructions on two related but distinct moral phenomena: stereotyping
+and discrimination. Stereotyping involves the use of generalizations about groups in ways that are often
+harmful or undesirable.4To measure stereotyping, we use two well-known stereotyping benchmarks, BBQ
+[40] (§3.2.2) and Windogender [49] (§3.2.3). For discrimination, we focus on whether models make disparate
+decisions about individuals based on protected characteristics that should have no relevance to the outcome.5
+To measure discrimination, we construct a new benchmark to test for the impact of race in a law school course
+
+
+Top 3 passage with score 0.9408788084983826 from http://arxiv.org/pdf/2302.07842:
+preferences and values which are diﬃcult to capture by hard- coded reward functions.
+RLHF works by using a pre-trained LM to generate text, which i s then evaluated by humans by, for example,
+ranking two model generations for the same prompt. This data is then collected to learn a reward model
+that predicts a scalar reward given any generated text. The r eward captures human preferences when
+judging model output. Finally, the LM is optimized against s uch reward model using RL policy gradient
+algorithms like PPO ( Schulman et al. ,2017). RLHF can be applied directly on top of a general-purpose LM
+pre-trained via self-supervised learning. However, for mo re complex tasks, the model’s generations may not
+be good enough. In such cases, RLHF is typically applied afte r an initial supervised ﬁne-tuning phase using
+a small number of expert demonstrations for the correspondi ng downstream task ( Ramamurthy et al. ,2022;
+Ouyang et al. ,2022;Stiennon et al. ,2020).
+A successful example of RLHF used to teach a LM to use an extern al tool stems from WebGPT Nakano et al.
+(2021) (discussed in 3.2.3), a model capable of answering questions using a search engine and providing
+
+</code></pre>
+</div>
+</div>
+<p>Let’s compare the ranking of the three models:</p>
+<div id="387a2379" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">25</span>):</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Top </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss"> passage. Bi-encoder </span><span class="sc">{</span>retrieval_corpus_ids[i]<span class="sc">}</span><span class="ss">, Cross-encoder (MS Marco) </span><span class="sc">{</span>msmarco_l6_corpus_ids[i]<span class="sc">}</span><span class="ss">, BGE </span><span class="sc">{</span>bge_corpus_ids[i]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top 1 passage. Bi-encoder 14679, Cross-encoder (MS Marco) 20638, BGE 14815
+Top 2 passage. Bi-encoder 17387, Cross-encoder (MS Marco) 17387, BGE 20638
+Top 3 passage. Bi-encoder 39564, Cross-encoder (MS Marco) 5628, BGE 17387
+Top 4 passage. Bi-encoder 14725, Cross-encoder (MS Marco) 14815, BGE 14679
+Top 5 passage. Bi-encoder 5628, Cross-encoder (MS Marco) 14749, BGE 9761
+Top 6 passage. Bi-encoder 14802, Cross-encoder (MS Marco) 9755, BGE 39564
+Top 7 passage. Bi-encoder 9761, Cross-encoder (MS Marco) 9761, BGE 20632
+Top 8 passage. Bi-encoder 14716, Cross-encoder (MS Marco) 9763, BGE 14725
+Top 9 passage. Bi-encoder 9763, Cross-encoder (MS Marco) 20632, BGE 9763
+Top 10 passage. Bi-encoder 20638, Cross-encoder (MS Marco) 14751, BGE 14750
+Top 11 passage. Bi-encoder 20653, Cross-encoder (MS Marco) 14725, BGE 14805
+Top 12 passage. Bi-encoder 9755, Cross-encoder (MS Marco) 35250, BGE 9755
+Top 13 passage. Bi-encoder 14806, Cross-encoder (MS Marco) 14806, BGE 14821
+Top 14 passage. Bi-encoder 14805, Cross-encoder (MS Marco) 14821, BGE 14802
+Top 15 passage. Bi-encoder 20652, Cross-encoder (MS Marco) 14750, BGE 14749
+Top 16 passage. Bi-encoder 20711, Cross-encoder (MS Marco) 20653, BGE 5628
+Top 17 passage. Bi-encoder 20632, Cross-encoder (MS Marco) 20711, BGE 14751
+Top 18 passage. Bi-encoder 14750, Cross-encoder (MS Marco) 39564, BGE 14716
+Top 19 passage. Bi-encoder 14749, Cross-encoder (MS Marco) 14802, BGE 14806
+Top 20 passage. Bi-encoder 35209, Cross-encoder (MS Marco) 14679, BGE 20711
+Top 21 passage. Bi-encoder 14671, Cross-encoder (MS Marco) 14716, BGE 20652
+Top 22 passage. Bi-encoder 14821, Cross-encoder (MS Marco) 14671, BGE 14671
+Top 23 passage. Bi-encoder 14751, Cross-encoder (MS Marco) 14805, BGE 20653
+Top 24 passage. Bi-encoder 14815, Cross-encoder (MS Marco) 20652, BGE 35209
+Top 25 passage. Bi-encoder 35250, Cross-encoder (MS Marco) 35209, BGE 35250</code></pre>
+</div>
+</div>
+<p>Interesting, we get very different results! Let’s briefly look into some of them.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I suggest doing something like <code>dataset["train"][20638]["chunk"]</code> to print a particular result. Here is a quick summary of the results.</p>
+</div>
+</div>
+<p>The bi-encoder is good at getting some results related to RLHF, but it’s struggling to get good, precise passages responding to what RLHF is. I looked at the top 5 results for each model. From looking at the passages, 17387 and 20638 are the only passages that really answer the question. Although the three models agree that 17387 is highly relevant, it’s interesting that the bi-encoder ranks 20638 lowly, while the two cross-encoders rank it highly. You can find them here.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 58%">
+<col style="width: 19%">
+<col style="width: 8%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Corpus ID</th>
+<th>Relevant text or summary</th>
+<th>Bi-encoder pos (from top 10)</th>
+<th>MSMarco pos</th>
+<th>BGE pos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>14679</td>
+<td>Discusses implications and applications of RLHF but no definition.</td>
+<td>1</td>
+<td>20</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td>17387</td>
+<td>Describes the process of RLHF in detail and applications</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>39564</td>
+<td>This chunk is messy and is more of a discussion section intro than an answer</td>
+<td>3</td>
+<td>18</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>14725</td>
+<td>Characteristics about RLHF but no definition of what it is</td>
+<td>4</td>
+<td>11</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td>20638</td>
+<td>“increasingly popular technique for reducing harmful behaviors in large language models”</td>
+<td>10</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>5628</td>
+<td>Discusses the reward modeling (a component) but does not define RLHF</td>
+<td>5</td>
+<td>3</td>
+<td>16</td>
+</tr>
+<tr class="odd">
+<td>14815</td>
+<td>Discusses RLHF but does not define it</td>
+<td>24</td>
+<td>4</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>14749</td>
+<td>Discusses impact of RLHF but it has no definition</td>
+<td>19</td>
+<td>5</td>
+<td>15</td>
+</tr>
+<tr class="odd">
+<td>9761</td>
+<td>Discusses the reward modeling (a component) but does not define RLHF</td>
+<td>7</td>
+<td>7</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p>Reranking is a frequent feature in libraries; <code>llamaindex</code> allows you to use a <code>VectorIndexRetriever</code> to retrieve and a <code>LLMRerank</code> to rerank (see <a href="https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/LLMReranker-Lyft-10k.html">tutorial</a>), Cohere offers a <a href="https://txt.cohere.com/rerank/">Rerank Endpoint</a> and <a href="https://qdrant.tech/articles/hybrid-search/">qdrant</a> supports similar functionality. However, as you saw above, it’s relatively simple to implement yourself. If you have a high-quality bi-encoder model, you can use it to rerank and benefit from its speed.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="LLMs as rerankers">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>LLMs as rerankers
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Some people use a generative LLM as a reranker. For example, <a href="https://cookbook.openai.com/examples/search_reranking_with_cross-encoders">OpenAI’s Coobook</a> has an example in which they use GPT-3 as a reranker by building a prompt asking the model to determine if a document is relevant for the document. Although this shows the impressive capabilities of an LLM, it’s usually not the best option for the task, as it will likely have worse quality, be more expensive, and be slower than a cross-encoder.</p>
+<p>Experiment and see what works best for your data. Using LLMs as rerankers can sometimes be helpful if your documents have very long contexts (for which bert-based models struggle).</p>
+</div>
+</div>
+</section>
+<section id="aside-specter2" class="level2">
+<h2 class="anchored" data-anchor-id="aside-specter2">Aside: SPECTER2</h2>
+<p>If you’re particularly excited about embeddings for scientific tasks, I suggest looking at <a href="https://huggingface.co/allenai/specter2_base">SPECTER2</a> from AllenAI, a family of models that generate embeddings for scientific papers. These models can be used to do things such as predicting links, looking for nearest papers, find candidate papers for a given query, classify papers using the embeddings as features, and more!</p>
+<p>The base model was trained on <a href="https://huggingface.co/datasets/allenai/scirepeval">scirepeval</a>, a dataset of millions of triples of scientific paper citations. After being trained, the authors fine-tuned the model using <a href="https://github.com/adapter-hub/adapters">adapters</a>, a library for parameter-efficient fine-tuning (don’t worry if you don’t know what this is). The authors attached a small neural network, called an adapter, to the base model. This adapter is trained to perform a specific task, but training for a specific task requires much fewer data than training the whole model. Because of these differences, one needs to use <code>transformers</code> and <code>adapters</code> to run inference, e.g.&nbsp;by doing something like</p>
+<pre><code>model = AutoAdapterModel.from_pretrained('allenai/specter2_base')
+model.load_adapter("allenai/specter2", source="hf", load_as="proximity", set_active=True)</code></pre>
+<p>I recommend reading the model card to learn more about the model and its usage. You can also read the <a href="https://www.semanticscholar.org/paper/SPECTER%3A-Document-level-Representation-Learning-Cohan-Feldman/a3e4ceb42cbcd2c807d53aff90a8cb1f5ee3f031">paper</a> for more details.</p>
+</section>
+<section id="aside-augmented-sbert" class="level2">
+<h2 class="anchored" data-anchor-id="aside-augmented-sbert">Aside: Augmented SBERT</h2>
+<p><a href="https://arxiv.org/abs/2010.08240">Augmented SBERT</a> is a technique for collecting data to improve bi-encoders. Pre-training and fine-tuning bi-encoders require lots of data, so the authors suggested using cross-encoders to label a large set of input pairs and add that to the training data. For example, if you have very little labeled data, you can train a cross-encoder and then label unlabeled pairs, which can be used to train a bi-encoder.</p>
+<p>How do you generate the pairs? We can use random combinations of sentences and then label them using the cross-encoder. This would lead to mostly negative pairs and skew the label distribution. To avoid this, the authors explored different techniques:</p>
+<ul>
+<li>With <strong>Kernel Density Estimation (KDE)</strong>, the goal is to have similar label distributions between a small, golden dataset and the augmentation dataset. This is achieved by dropping some negative pairs. Of course, this will be inefficient as you’ll need to generate many pairs to get a few positive ones.</li>
+<li><strong>BM25</strong> is an algorithm used in search engines based on overlap (e.g., word frequency, length of document, etc.). Based on this, the authors get the top-k similar sentences to retrieve the k most similar sentences, and then, a cross-encoder is used to label them. This is efficient but will only be able to capture semantic similarity if there is little overlap between the sentences.</li>
+<li><strong>Semantic Search Sampling</strong> trains a bi-encoder on the golden data and then used to sample other similar pairs.</li>
+<li><strong>BM25 + Semantic Search Sampling</strong> combines the two previous methods. This helps find lexical and semantically similar sentences.</li>
+</ul>
+<p>There are nice figures and example scripts to do this in the <a href="https://www.sbert.net/examples/training/data_augmentation/README.html">Sentence Transformers docs</a>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="augmented.png" class="img-fluid figure-img"></p>
+<figcaption>Augmented SBERT - the image is from the original paper</figcaption>
+</figure>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>That was fun! We just learned to do one of the most common sentence embedding tasks: retrieve and rerank! We learned about the differences between bi-encoders and cross-encoders and when to use one versus the other. We also learned about some techniques to improve bi-encoders, such as augmented SBERT.</p>
+<p>Don’t hesitate to change the code and play with it! If you like this blog post, don’t hesitate to <a href="https://github.com/osanseviero/hackerllama">leave a GitHub Star</a> or share it, that’s always appreciated and motivating!</p>
+</section>
+<section id="knowledge-check" class="level2">
+<h2 class="anchored" data-anchor-id="knowledge-check">Knowledge Check</h2>
+<ol type="1">
+<li>What is the difference between bi-encoders and cross-encoders?</li>
+<li>Explain the different steps of reranking.</li>
+<li>How many embeddings would we need to generate to compare 30,000 sentences using a bi-encoder? How many times would we run inference with a cross-encoder?</li>
+<li>What are some techniques to improve bi-encoders?</li>
+</ol>
+<p>Now, you have solid foundations to implement your search system. As a follow-up, I suggest implementing a similar retrieve and rerank system with a different dataset. Explore how changing both retrieval and reranking models impact your results.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/osanseviero\.github\.io\/hackerllama");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="osanseviero/hackerllama" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

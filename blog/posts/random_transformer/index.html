@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-01-01">
+<meta name="description" content="Understand how transformers work by demystifying all the math behind them">
+
+<title>The Random Transformer – hackerllama</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../../hacker.png" rel="icon" type="image/png">
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b758ccaa5987ceb1b75504551e579abf.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-7f54657f98cfd61baa5fc740dde4b5a5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-SF72633X8L"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-SF72633X8L', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../styles.css">
+<meta property="og:title" content="The Random Transformer – hackerllama">
+<meta property="og:description" content="Understand how transformers work by demystifying all the math behind them">
+<meta property="og:image" content="https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/transformer.png">
+<meta property="og:site_name" content="hackerllama">
+<meta property="og:image:height" content="1703">
+<meta property="og:image:width" content="1400">
+<meta name="twitter:title" content="The Random Transformer – hackerllama">
+<meta name="twitter:description" content="Understand how transformers work by demystifying all the math behind them">
+<meta name="twitter:image" content="https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/transformer.png">
+<meta name="twitter:image-height" content="1703">
+<meta name="twitter:image-width" content="1400">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">hackerllama</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../resources.html"> 
+<span class="menu-text">Misc Resources</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/osanseviero"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/omarsanseviero/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/osanseviero"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../../blog/index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#encoder" id="toc-encoder" class="nav-link active" data-scroll-target="#encoder">Encoder</a>
+  <ul>
+  <li><a href="#tokenization" id="toc-tokenization" class="nav-link" data-scroll-target="#tokenization">0. Tokenization</a></li>
+  <li><a href="#embedding-the-text" id="toc-embedding-the-text" class="nav-link" data-scroll-target="#embedding-the-text">1. Embedding the text</a></li>
+  <li><a href="#positional-encoding" id="toc-positional-encoding" class="nav-link" data-scroll-target="#positional-encoding">2 Positional encoding</a></li>
+  <li><a href="#add-positional-encoding-and-embedding" id="toc-add-positional-encoding-and-embedding" class="nav-link" data-scroll-target="#add-positional-encoding-and-embedding">3. Add positional encoding and embedding</a></li>
+  <li><a href="#self-attention" id="toc-self-attention" class="nav-link" data-scroll-target="#self-attention">4. Self-attention</a>
+  <ul>
+  <li><a href="#matrices-definition" id="toc-matrices-definition" class="nav-link" data-scroll-target="#matrices-definition">4.1 Matrices Definition</a></li>
+  <li><a href="#keys-queries-and-values-calculation" id="toc-keys-queries-and-values-calculation" class="nav-link" data-scroll-target="#keys-queries-and-values-calculation">4.2 Keys, queries, and values calculation</a></li>
+  <li><a href="#attention-calculation" id="toc-attention-calculation" class="nav-link" data-scroll-target="#attention-calculation">4.3 Attention calculation</a>
+  <ul class="collapse">
+  <li><a href="#dot-product-of-query-with-each-key" id="toc-dot-product-of-query-with-each-key" class="nav-link" data-scroll-target="#dot-product-of-query-with-each-key">4.3.1 Dot product of query with each key</a></li>
+  <li><a href="#divide-by-square-root-of-dimension-of-key-vector" id="toc-divide-by-square-root-of-dimension-of-key-vector" class="nav-link" data-scroll-target="#divide-by-square-root-of-dimension-of-key-vector">4.3.2 Divide by square root of dimension of key vector</a></li>
+  <li><a href="#apply-softmax-function" id="toc-apply-softmax-function" class="nav-link" data-scroll-target="#apply-softmax-function">4.3.3 Apply softmax function</a></li>
+  <li><a href="#multiply-value-matrix-by-attention-weights" id="toc-multiply-value-matrix-by-attention-weights" class="nav-link" data-scroll-target="#multiply-value-matrix-by-attention-weights">4.3.4 Multiply value matrix by attention weights</a></li>
+  <li><a href="#heads-attention-output" id="toc-heads-attention-output" class="nav-link" data-scroll-target="#heads-attention-output">4.3.5 Heads’ attention output</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#feed-forward-layer" id="toc-feed-forward-layer" class="nav-link" data-scroll-target="#feed-forward-layer">5. Feed-forward layer</a>
+  <ul>
+  <li><a href="#basic-feed-forward-layer" id="toc-basic-feed-forward-layer" class="nav-link" data-scroll-target="#basic-feed-forward-layer">5.1 Basic feed-forward layer</a></li>
+  <li><a href="#encapsulating-everything-the-random-encoder" id="toc-encapsulating-everything-the-random-encoder" class="nav-link" data-scroll-target="#encapsulating-everything-the-random-encoder">5.2 Encapsulating everything: The Random Encoder</a></li>
+  <li><a href="#residual-and-layer-normalization" id="toc-residual-and-layer-normalization" class="nav-link" data-scroll-target="#residual-and-layer-normalization">5.3 Residual and Layer Normalization</a>
+  <ul class="collapse">
+  <li><a href="#mean-and-variance" id="toc-mean-and-variance" class="nav-link" data-scroll-target="#mean-and-variance">5.3.1 Mean and variance</a></li>
+  <li><a href="#normalize" id="toc-normalize" class="nav-link" data-scroll-target="#normalize">5.3.2 Normalize</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#decoder" id="toc-decoder" class="nav-link" data-scroll-target="#decoder">Decoder</a>
+  <ul>
+  <li><a href="#embedding-the-text-1" id="toc-embedding-the-text-1" class="nav-link" data-scroll-target="#embedding-the-text-1">1. Embedding the text</a></li>
+  <li><a href="#positional-encoding-1" id="toc-positional-encoding-1" class="nav-link" data-scroll-target="#positional-encoding-1">2. Positional encoding</a></li>
+  <li><a href="#add-positional-encoding-and-embedding-1" id="toc-add-positional-encoding-and-embedding-1" class="nav-link" data-scroll-target="#add-positional-encoding-and-embedding-1">3. Add positional encoding and embedding</a></li>
+  <li><a href="#self-attention-1" id="toc-self-attention-1" class="nav-link" data-scroll-target="#self-attention-1">4. Self-attention</a></li>
+  <li><a href="#residual-connection-and-layer-normalization" id="toc-residual-connection-and-layer-normalization" class="nav-link" data-scroll-target="#residual-connection-and-layer-normalization">5. Residual connection and layer normalization</a></li>
+  <li><a href="#encoder-decoder-attention" id="toc-encoder-decoder-attention" class="nav-link" data-scroll-target="#encoder-decoder-attention">6. Encoder-decoder attention</a></li>
+  <li><a href="#residual-connection-and-layer-normalization-1" id="toc-residual-connection-and-layer-normalization-1" class="nav-link" data-scroll-target="#residual-connection-and-layer-normalization-1">7. Residual connection and layer normalization</a></li>
+  <li><a href="#feed-forward-layer-1" id="toc-feed-forward-layer-1" class="nav-link" data-scroll-target="#feed-forward-layer-1">8. Feed-forward layer</a></li>
+  <li><a href="#encapsulating-everything-the-random-decoder" id="toc-encapsulating-everything-the-random-decoder" class="nav-link" data-scroll-target="#encapsulating-everything-the-random-decoder">9. Encapsulating everything: The Random Decoder</a></li>
+  </ul></li>
+  <li><a href="#generating-the-output-sequence" id="toc-generating-the-output-sequence" class="nav-link" data-scroll-target="#generating-the-output-sequence">Generating the output sequence</a>
+  <ul>
+  <li><a href="#linear-layer" id="toc-linear-layer" class="nav-link" data-scroll-target="#linear-layer">1. Linear layer</a></li>
+  <li><a href="#softmax" id="toc-softmax" class="nav-link" data-scroll-target="#softmax">2. Softmax</a></li>
+  <li><a href="#the-random-encoder-decoder-transformer" id="toc-the-random-encoder-decoder-transformer" class="nav-link" data-scroll-target="#the-random-encoder-decoder-transformer">3. The Random Encoder-Decoder Transformer</a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">The Random Transformer</h1>
+</div>
+
+<div>
+  <div class="description">
+    Understand how transformers work by demystifying all the math behind them
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 1, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>In this blog post, we’ll do an end-to-end example of the math within a transformer model. The goal is to get a good understanding of how the model works. To make this manageable, we’ll do lots of simplification. As we’ll be doing quite a bit of the math by hand, we’ll reduce the dimensions of the model. For example, rather than using embeddings of 512 values, we’ll use embeddings of 4 values. This will make the math easier to follow! We’ll use random vectors and matrices, but you can use your own values if you want to follow along.</p>
+<p>As you’ll see, the math is not that complicated. The complexity comes from the number of steps and the number of parameters. <strong>I recommend you to read the <a href="http://jalammar.github.io/illustrated-transformer/">The Illustrated Transformer</a> blog before reading this blog post (or reading in parallel)</strong>. It’s a great blog post that explains the transformer model in a very intuitive (and illustrative!) way and I don’t intend to explain what it’s already explained there. My goal is to explain the “how” of the transformer model, not the “what”. If you want to dive even deeper, check out the famous original paper: <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a>.</p>
+<p><strong>Prerequisites</strong></p>
+<p>A basic understanding of linear algebra is required - we’ll mostly do simple matrix multiplications, so no need to be an expert. Apart from that, basic understanding of Machine Learning and Deep Learning will be useful.</p>
+<p><strong>What is covered here?</strong></p>
+<ul>
+<li>An end-to-end example of the math within a transformer model during inference</li>
+<li>An explanation of attention mechanisms</li>
+<li>An explanation of residual connections and layer normalization</li>
+<li>Some code to scale it up!</li>
+</ul>
+<p>Without further ado, let’s get started! Our goal will be to use the transformer model as a translation tool, so we’ll pass an input to the model expecting it to generate the translation. For example, we could pass “Hello World” in English and expect “Hola Mundo” in Spanish.</p>
+<p>Let’s take a look at the diagram of the transformer beast (don’t be intimidatd by it, you’ll soon understand it!):</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://arxiv.org/abs/1706.03762"><img src="transformer.png" class="img-fluid figure-img"></a></p>
+<figcaption>Transformer model from the original “attention is all you need” paper</figcaption>
+</figure>
+</div>
+<p>The original transformer model has two parts: encoder and decoder. The encoder focus is in “understanding” or “capturing the meaning” of the input text, while the decoder focus is in generating the output text. We’ll first focus on the encoder part.</p>
+<section id="encoder" class="level2">
+<h2 class="anchored" data-anchor-id="encoder">Encoder</h2>
+<p>The whole goal of the encoder is to generate a rich embedding representation of the input text. This embedding will capture semantic information about the input, and will then be passed to the decoder to generate the output text. The encoder is composed of a stack of N layers. Before we jump into the layers, we need to see how to pass the words (or tokens) into the model.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Embeddings are a somewhat overused term. We’ll first create an embedding that will be the input to the encoder. The encoder also outputs an embedding (also called hidden states sometimes). The decoder will also receive an embedding! 😅 The whole point of an embedding is to represent a token as a vector.</p>
+</div>
+</div>
+<section id="tokenization" class="level3">
+<h3 class="anchored" data-anchor-id="tokenization">0. Tokenization</h3>
+<p>ML models can process numbers, not text. soo we need to turn our input text into numbers. That’s what <strong>tokenization</strong> does! This is the process of splitting the input text into tokens, each with an associated ID. For example, we could split the text “Hello World” into two tokens: “Hello” and “World”. We could also split it into characters: “H”, “e”, “l”, “l”, “o”, ” “,”W”, “o”, “r”, “l”, “d”. The choice of tokenization is up to us and depends on the data we’re working with.</p>
+<p>Word-based tokenization (splitting the text into words) will require a very large <strong>vocabulary</strong> (all possible tokens). It will also represent words like “dog” and “dogs” or “run” and “running” as different tokens. Character-based vocabulary will require a smaller vocabulary, but will provide less meaning (in can be useful for languages such as Chinese where each character carries more information).</p>
+<p>The field has moved towards subword tokenization. This is a middle ground between word-based and character-based tokenization. We’ll split the words into subwords. For example, we could split “tokenization” into “token” and “ization”. How do we decide how to split the words? This is part of training a tokenizer through a statistical process that tries to identify which subwords are the best to pick given a dataset. It’s a deterministic process (unlike training a ML model).</p>
+<p>For this blog post, let’s go with word tokenization for simplicity. Our goal will be to translate “Hello World” from English to Spanish. Given an example “Hello World”, we’ll split into tokens: “Hello” and “World”. Each token has an associated ID defined in the model’s vocabulary. For example, “Hello” could be token 1 and “World” could be token 2.</p>
+</section>
+<section id="embedding-the-text" class="level3">
+<h3 class="anchored" data-anchor-id="embedding-the-text">1. Embedding the text</h3>
+<p>Although we could pass the token IDs to the model (e.g.&nbsp;1 and 2), these numbers don’t carry any meaning. We need to turn them into vectors (list of numbers). This is what <strong>embedding</strong> does! The token embeddings map a token ID to a fixed-size vector with some <strong>semantic meaning</strong> of the tokens**. This brings some interesting properties: similar tokens will have a similar embedding (in other words, calculating the cosine similarity between two embeddings will give us a good idea of how similar the tokens are).</p>
+<p>Note that the mapping from a token to an embedding is learned. Although we could use a pre-trained embedding such as word2vec or GloVe, transformers models learn these embeddings as part of their training. This is a big advantage as the model can learn the best representation of the tokens for the task at hand. For example, the model could learn that “dog” and “dogs” should have similar embeddings.</p>
+<p>All embeddings in a single model have the same size. The original transformer used a size of 512, but let’s do 4 for our example so we can keep the maths manageable. I’ll assign some random values to each token (as mentioned, this mapping is usually learned by the model).</p>
+<p>Hello -&gt; [1,2,3,4]</p>
+<p>World -&gt; [2,3,4,5]</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After releasing this blog post, multiple persons raised questions about the embeddings above. I was a bit lazy and just wrote down some numbers that will make for some nice math below. In practice, these numbers would be learned by the model. I’ve updated the blog post to make this clearer. Thanks to everyone who raised this question!</p>
+<p>We can estimate how similar these vectors are using cosine similarity, which would be too high for the vectors above. In practice, a vector would likely look something like [-0.071, 0.344, -0.12, 0.026, …, -0.008].</p>
+</div>
+</div>
+<p>We can represent our input as a single matrix</p>
+<p><span class="math display">\[
+E = \begin{bmatrix}
+1 &amp; 2 &amp; 3 &amp; 4 \\
+2 &amp; 3 &amp; 4 &amp; 5
+\end{bmatrix}
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Although we could manage the two embeddings as separate vectors, it’s easier to manage them as a single matrix. This is because we’ll be doing matrix multiplications as we move forward!</p>
+</div>
+</div>
+</section>
+<section id="positional-encoding" class="level3">
+<h3 class="anchored" data-anchor-id="positional-encoding">2 Positional encoding</h3>
+<p>The individual embeddings in the matrix contain no information about the position of the words in the sentence”, so we need to feed some positional information. The way we do this is by adding a positional encoding to the embedding.</p>
+<p>There are different choices on how to obtain these - we could use a learned embedding or a fixed vector. The original paper uses a fixed vector as they see almost no difference between the two approaches (see section 3.5 of the original paper). We’ll use a fixed vector as well. Sine and cosine functions have a wave-like pattern, and they repeat over time. By using these functions, <strong>each position in the sentence gets a unique</strong> yet consistent positional encoding. Given they repeat over time, it can help the model more easily learn patterns like proximity and distance between elements. These are the functions they use in the paper (section 3.5):</p>
+<p><span class="math display">\[
+PE(pos, 2i) = \sin\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
+\]</span></p>
+<p><span class="math display">\[
+PE(pos, 2i+1) = \cos\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
+\]</span></p>
+<p>The idea is to interpolate between sine and cosine for each value in the embedding (even indices will use sine, odd indices will use cosine). Let’s calculate them for our example!</p>
+<p>For “Hello”</p>
+<ul>
+<li>i = 0 (even): PE(0,0) = sin(0 / 10000^(0 / 4)) = sin(0) = 0</li>
+<li>i = 1 (odd): PE(0,1) = cos(0 / 10000^(2*1 / 4)) = cos(0) = 1</li>
+<li>i = 2 (even): PE(0,2) = sin(0 / 10000^(2*2 / 4)) = sin(0) = 0</li>
+<li>i = 3 (odd): PE(0,3) = cos(0 / 10000^(2*3 / 4)) = cos(0) = 1</li>
+</ul>
+<p>For “World”</p>
+<ul>
+<li>i = 0 (even): PE(1,0) = sin(1 / 10000^(0 / 4)) = sin(1 / 10000^0) = sin(1) ≈ 0.84</li>
+<li>i = 1 (odd): PE(1,1) = cos(1 / 10000^(2*1 / 4)) = cos(1 / 10000^0.5) ≈ cos(0.01) ≈ 0.99</li>
+<li>i = 2 (even): PE(1,2) = sin(1 / 10000^(2*2 / 4)) = sin(1 / 10000^1) ≈ 0</li>
+<li>i = 3 (odd): PE(1,3) = cos(1 / 10000^(2*3 / 4)) = cos(1 / 10000^1.5) ≈ 1</li>
+</ul>
+<p>So concluding</p>
+<ul>
+<li>“Hello” -&gt; [0, 1, 0, 1]</li>
+<li>“World” -&gt; [0.84, 0.99, 0, 1]</li>
+</ul>
+<p>Note that these encodings have the same dimension as the original embedding.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While we use sine and cosine as the original paper, there are other ways to do this. BERT, a very popular transformer, use trainable positional embeddings.</p>
+</div>
+</div>
+</section>
+<section id="add-positional-encoding-and-embedding" class="level3">
+<h3 class="anchored" data-anchor-id="add-positional-encoding-and-embedding">3. Add positional encoding and embedding</h3>
+<p>We now add the positional encoding to the embedding. This is done by adding the two vectors together.</p>
+<p>“Hello” = [1,2,3,4] + [0, 1, 0, 1] = [1, 3, 3, 5] “World” = [2,3,4,5] + [0.84, 0.99, 0, 1] = [2.84, 3.99, 4, 6]</p>
+<p>So our new matrix, which will be the input to the encoder, is:</p>
+<p><span class="math display">\[
+E = \begin{bmatrix}
+1 &amp; 3 &amp; 3 &amp; 5 \\
+2.84 &amp; 3.99 &amp; 4 &amp; 6
+\end{bmatrix}
+\]</span></p>
+<p>If you look at the original paper’s image, what we just did is the bottom left part of the image (the embedding + positional encoding).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://arxiv.org/abs/1706.03762"><img src="transformer.png" class="img-fluid figure-img"></a></p>
+<figcaption>Transformer model from the original “attention is all you need” paper</figcaption>
+</figure>
+</div>
+</section>
+<section id="self-attention" class="level3">
+<h3 class="anchored" data-anchor-id="self-attention">4. Self-attention</h3>
+<section id="matrices-definition" class="level4">
+<h4 class="anchored" data-anchor-id="matrices-definition">4.1 Matrices Definition</h4>
+<p>We’ll now introduce the concept of multi-head attention. Attention is a mechanism that allows the model to focus on certain parts of the input. Multi-head attention is a way to allow the model to jointly attend to information from different representation subspaces. This is done by using multiple attention heads. Each attention head will have its own K, V, and Q matrices.</p>
+<p>Let’s use 2 attention heads for our example. We’ll use random values for these matrices. Each matrix will be a 4x3 matrix. With this, each matrix will transform the 4-dimensional embeddings into 3-dimensional keys, values, and queries. This reduces the dimensionality for attention mechanism, which helps in managing the computational complexity. Note that using a too small attention size will hurt the performance of the model. Let’s use the following values (just random values):</p>
+<p><strong>For the first head</strong></p>
+<p><span class="math display">\[
+\begin{align*}
+WK1 &amp;= \begin{bmatrix}
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0 \\
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0
+\end{bmatrix}, \quad
+WV1 &amp;= \begin{bmatrix}
+0 &amp; 1 &amp; 1 \\
+1  &amp; 0 &amp; 0 \\
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0
+\end{bmatrix}, \quad
+WQ1 &amp;= \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+1 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1 \\
+1 &amp; 1 &amp; 0
+\end{bmatrix}
+\end{align*}
+\]</span></p>
+<p><strong>For the second head</strong></p>
+<p><span class="math display">\[
+\begin{align*}
+WK2 &amp;= \begin{bmatrix}
+0 &amp; 1 &amp; 1 \\
+1 &amp; 0 &amp; 1 \\
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0
+\end{bmatrix}, \quad
+WV2 &amp;= \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 1 \\
+0 &amp; 0 &amp; 1 \\
+1 &amp; 0 &amp; 0
+\end{bmatrix}, \quad
+WQ2 &amp;= \begin{bmatrix}
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0 \\
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 1
+\end{bmatrix}
+\end{align*}
+\]</span></p>
+</section>
+<section id="keys-queries-and-values-calculation" class="level4">
+<h4 class="anchored" data-anchor-id="keys-queries-and-values-calculation">4.2 Keys, queries, and values calculation</h4>
+<p>We now need to multiply our input embeddings with the weight matrices to obtain the keys, queries, and values.</p>
+<p><strong>Key calculation</strong></p>
+<p><span class="math display">\[
+\begin{align*}
+E \times WK1 &amp;= \begin{bmatrix}
+1 &amp; 3 &amp; 3 &amp; 5 \\
+2.84 &amp; 3.99 &amp; 4 &amp; 6
+\end{bmatrix}
+\begin{bmatrix}
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0 \\
+1 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+(1 \times 1) + (3 \times 0) + (3 \times 1) + (5 \times 0) &amp; (1 \times 0) + (3 \times 1) + (3 \times 0) + (5 \times 1) &amp; (1 \times 1) + (3 \times 0) + (3 \times 1) + (5 \times 0) \\
+(2.84 \times 1) + (3.99 \times 0) + (4 \times 1) + (6 \times 0) &amp; (2.84 \times 0) + (4 \times 1) + (4 \times 0) + (6 \times 1) &amp; (2.84 \times 1) + (4 \times 0) + (4 \times 1) + (6 \times 0)
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+4 &amp; 8 &amp; 4 \\
+6.84 &amp; 9.99 &amp; 6.84
+\end{bmatrix}
+\end{align*}
+\]</span></p>
+<p>Ok, I actually do not want to do the math by hand for all of these - it gets a bit repetitive plus it breaks the site. So let’s cheat and use NumPy to do the calculations for us.</p>
+<p>We first define the matrices</p>
+<div id="2d86c87b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>WK1 <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>]])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>WV1 <span class="op">=</span> np.array([[<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>]])</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>WQ1 <span class="op">=</span> np.array([[<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>]])</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>WK2 <span class="op">=</span> np.array([[<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>]])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>WV2 <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>]])</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>WQ2 <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>And let’s confirm that I didn’t make any mistakes in the calculations above.</p>
+<div id="4df0e85b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>embedding <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">5</span>], [<span class="fl">2.84</span>, <span class="fl">3.99</span>, <span class="dv">4</span>, <span class="dv">6</span>]])</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>K1 <span class="op">=</span> embedding <span class="op">@</span> WK1</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>K1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[4.  , 8.  , 4.  ],
+       [6.84, 9.99, 6.84]])</code></pre>
+</div>
+</div>
+<p>Phew! Let’s now get the values and queries</p>
+<p><strong>Value calculations</strong></p>
+<div id="51507ce9" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>V1 <span class="op">=</span> embedding <span class="op">@</span> WV1</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>V1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[6.  , 6.  , 4.  ],
+       [7.99, 8.84, 6.84]])</code></pre>
+</div>
+</div>
+<p><strong>Query calculations</strong></p>
+<div id="9f4e95bc" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Q1 <span class="op">=</span> embedding <span class="op">@</span> WQ1</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Q1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[8.  , 3.  , 3.  ],
+       [9.99, 3.99, 4.  ]])</code></pre>
+</div>
+</div>
+<p>Let’s skip the second head for now and focus on the first head final score. We’ll come back to the second head later.</p>
+</section>
+<section id="attention-calculation" class="level4">
+<h4 class="anchored" data-anchor-id="attention-calculation">4.3 Attention calculation</h4>
+<p>Calculating the attention score requires a couple of steps:</p>
+<ol type="1">
+<li>Calculate the dot product of the query with each key</li>
+<li>Divide the result by the square root of the dimension of the key vector</li>
+<li>Apply a softmax function to obtain the attention weights</li>
+<li>Multiply each value vector by the attention weights</li>
+</ol>
+<section id="dot-product-of-query-with-each-key" class="level5">
+<h5 class="anchored" data-anchor-id="dot-product-of-query-with-each-key">4.3.1 Dot product of query with each key</h5>
+<p>The score for “Hello” requires calculating the dot product of q1 with each key vector (k1 and k2)</p>
+<p><span class="math display">\[
+\begin{align*}
+q1 \cdot k1 &amp;= \begin{bmatrix} 8 &amp; 3 &amp; 3 \end{bmatrix} \cdot \begin{bmatrix} 4 \\ 8 \\ 4 \end{bmatrix} \\
+&amp;= 8 \cdot 4 + 3 \cdot 8 + 3 \cdot 4 \\
+&amp;= 68
+\end{align*}
+\]</span></p>
+<p>In matrix world, that would be Q1 multiplied by the transpose of K1</p>
+<p><span class="math display">\[\begin{align*}
+Q1 \times K1^\top &amp;= \begin{bmatrix} 8 &amp; 3 &amp; 3 \\ 9.99 &amp; 3.99 &amp; 4 \end{bmatrix} \times \begin{bmatrix} 4 &amp; 6.84 \\ 8 &amp; 9.99 \\ 4 &amp; 6.84 \end{bmatrix} \\
+&amp;= \begin{bmatrix}
+    8 \cdot 4 + 3 \cdot 8 + 3 \cdot 4 &amp; 8 \cdot 6.84 + 3 \cdot 9.99 + 3 \cdot 6.84 \\
+    9.99 \cdot 4 + 3.99 \cdot 8 + 4 \cdot 4 &amp; 9.99 \cdot 6.84 + 3.99 \cdot 9.99 + 4 \cdot 6.84
+    \end{bmatrix} \\
+&amp;= \begin{bmatrix}
+    68 &amp; 105.21 \\
+    87.88 &amp; 135.5517
+    \end{bmatrix}
+\end{align*}\]</span></p>
+<p>I’m prone to do mistakes, so let’s confirm with Python once again</p>
+<div id="a32f968f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>scores1 <span class="op">=</span> Q1 <span class="op">@</span> K1.T</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>scores1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 68.    , 105.21  ],
+       [ 87.88  , 135.5517]])</code></pre>
+</div>
+</div>
+</section>
+<section id="divide-by-square-root-of-dimension-of-key-vector" class="level5">
+<h5 class="anchored" data-anchor-id="divide-by-square-root-of-dimension-of-key-vector">4.3.2 Divide by square root of dimension of key vector</h5>
+<p>We then divide the scores by the square root of the dimension (d) of the keys (3 in this case, but 64 in the original paper). Why? For large values of d, the dot product grows too large (we’re adding the multiplication of a bunch of numbers, after all, leading to high values). And large values are bad! We’ll discuss soon more about this.</p>
+<div id="1122634f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>scores1 <span class="op">=</span> scores1 <span class="op">/</span> np.sqrt(<span class="dv">3</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>scores1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[39.2598183 , 60.74302182],
+       [50.73754166, 78.26081048]])</code></pre>
+</div>
+</div>
+</section>
+<section id="apply-softmax-function" class="level5">
+<h5 class="anchored" data-anchor-id="apply-softmax-function">4.3.3 Apply softmax function</h5>
+<p>We then softmax to normalize so they are all positive and add up to 1.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What is softmax?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What is softmax?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Softmax is a function that takes a vector of values and returns a vector of values between 0 and 1, where the sum of the values is 1. It’s a nice way of obtaining probabilities. It’s defined as follows:</p>
+<p><span class="math display">\[
+\text{softmax}(x_i) = \frac{e^{x_i}}{\sum_{j=1}^n e^{x_j}}
+\]</span></p>
+<p>Don’t be intimidated by the formula - it’s actually quite simple. Let’s say we have the following vector:</p>
+<p><span class="math display">\[
+x = \begin{bmatrix} 1 &amp; 2 &amp; 3 \end{bmatrix}
+\]</span></p>
+<p>The softmax of this vector would be:</p>
+<p><span class="math display">\[
+\text{softmax}(x) = \begin{bmatrix} \frac{e^1}{e^1 + e^2 + e^3} &amp; \frac{e^2}{e^1 + e^2 + e^3} &amp; \frac{e^3}{e^1 + e^2 + e^3} \end{bmatrix} = \begin{bmatrix} 0.09 &amp; 0.24 &amp; 0.67 \end{bmatrix}
+\]</span></p>
+<p>As you can see, the values are all positive and add up to 1.</p>
+</div>
+</div>
+<div id="a5344a87" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> softmax(x):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp(x) <span class="op">/</span> np.<span class="bu">sum</span>(np.exp(x), axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>scores1 <span class="op">=</span> softmax(scores1)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>scores1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[4.67695573e-10, 1.00000000e+00],
+       [1.11377182e-12, 1.00000000e+00]])</code></pre>
+</div>
+</div>
+</section>
+<section id="multiply-value-matrix-by-attention-weights" class="level5">
+<h5 class="anchored" data-anchor-id="multiply-value-matrix-by-attention-weights">4.3.4 Multiply value matrix by attention weights</h5>
+<p>We then multiply times the value matrix</p>
+<div id="d9e2b597" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>attention1 <span class="op">=</span> scores1 <span class="op">@</span> V1</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>attention1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[7.99, 8.84, 6.84],
+       [7.99, 8.84, 6.84]])</code></pre>
+</div>
+</div>
+<p>Let’s combine 4.3.1, 4.3.2, 4.3.3, and 4.3.4 into a single formula using matrices (this is from section 3.2.1 of the original paper):</p>
+<p><span class="math display">\[
+Attention(Q,K,V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d}}\right)V
+\]</span></p>
+<p>Yes, that’s it! All the math we just did can easily be encapsulated in the attention formula above! Let’s now translate this to code!</p>
+<div id="1279f4fe" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> attention(x, WQ, WK, WV):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> x <span class="op">@</span> WK</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> x <span class="op">@</span> WV</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    Q <span class="op">=</span> x <span class="op">@</span> WQ</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Q <span class="op">@</span> K.T</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">/</span> np.sqrt(<span class="dv">3</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> softmax(scores)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">@</span> V</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="8fd743f2" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>attention(embedding, WQ1, WK1, WV1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[7.99, 8.84, 6.84],
+       [7.99, 8.84, 6.84]])</code></pre>
+</div>
+</div>
+<p>We confirm we got same values as above. Let’s chear and use this to obtain the attention scores the second attention head:</p>
+<div id="77d1d39e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>attention2 <span class="op">=</span> attention(embedding, WQ2, WK2, WV2)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>attention2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[8.84, 3.99, 7.99],
+       [8.84, 3.99, 7.99]])</code></pre>
+</div>
+</div>
+<p>If you’re wondering how come the attention is the same for the two embeddings, it’s because the softmax is taking our scores to 0 and 1. See this:</p>
+<div id="86bfce07" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>softmax(((embedding <span class="op">@</span> WQ2) <span class="op">@</span> (embedding <span class="op">@</span> WK2).T) <span class="op">/</span> np.sqrt(<span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[1.10613872e-14, 1.00000000e+00],
+       [4.95934510e-20, 1.00000000e+00]])</code></pre>
+</div>
+</div>
+<p>This is due to bad initialization of the matrices and small vector sizes. Large differences in the scores before applying softmax will just be amplified with softmax, leading to one value being close to 1 and others close to 0. In practice, our initial embedding matrices’ values were maybe too high, leading to high values for the keys, values, and queries, which just grew larger as we multiplied them.</p>
+<p>Remember when we were dividing by the square root of the dimension of the keys? This is why we do that. If we don’t do that, the values of the dot product will be too large, leading to large values after the softmax. In this case, though, it seems it wasn’t enough given our small values! As a short-term hack, we can scale down the values by a larger amount than the square root of 3. Let’s redefine the attention function but scaling down by 30. This is not a good long-term solution, but it will help us get different values for the attention scores. We’ll get back to a better solution later.</p>
+<div id="5752a1b7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> attention(x, WQ, WK, WV):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> x <span class="op">@</span> WK</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> x <span class="op">@</span> WV</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    Q <span class="op">=</span> x <span class="op">@</span> WQ</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Q <span class="op">@</span> K.T</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">/</span> <span class="dv">30</span>  <span class="co"># we just changed this</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> softmax(scores)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">@</span> V</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="07a1403b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>attention1 <span class="op">=</span> attention(embedding, WQ1, WK1, WV1)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>attention1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[7.54348784, 8.20276657, 6.20276657],
+       [7.65266185, 8.35857269, 6.35857269]])</code></pre>
+</div>
+</div>
+<div id="76fcc4bd" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>attention2 <span class="op">=</span> attention(embedding, WQ2, WK2, WV2)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>attention2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[8.45589591, 3.85610456, 7.72085664],
+       [8.63740591, 3.91937741, 7.84804146]])</code></pre>
+</div>
+</div>
+</section>
+<section id="heads-attention-output" class="level5">
+<h5 class="anchored" data-anchor-id="heads-attention-output">4.3.5 Heads’ attention output</h5>
+<p>The next layer of the encoder will expect a single matrix, not two. The first step will be to concatenate the two heads’ outputs (section 3.2.2 of the original paper)</p>
+<div id="6e07ccbb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>attentions <span class="op">=</span> np.concatenate([attention1, attention2], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>attentions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[7.54348784, 8.20276657, 6.20276657, 8.45589591, 3.85610456,
+        7.72085664],
+       [7.65266185, 8.35857269, 6.35857269, 8.63740591, 3.91937741,
+        7.84804146]])</code></pre>
+</div>
+</div>
+<p>We finally multiply this concatenated matrix by a weight matrix to obtain the final output of the attention layer. This weight matrix is also learned! The dimension of the matrix ensures we go back to the same dimension as the embedding (4 in our case).</p>
+<div id="953bf008" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Just some random values</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> np.array(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.79445237</span>, <span class="fl">0.1081456</span>, <span class="fl">0.27411536</span>, <span class="fl">0.78394531</span>],</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.29081936</span>, <span class="op">-</span><span class="fl">0.36187258</span>, <span class="op">-</span><span class="fl">0.32312791</span>, <span class="op">-</span><span class="fl">0.48530339</span>],</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        [<span class="op">-</span><span class="fl">0.36702934</span>, <span class="op">-</span><span class="fl">0.76471963</span>, <span class="op">-</span><span class="fl">0.88058366</span>, <span class="op">-</span><span class="fl">1.73713022</span>],</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>        [<span class="op">-</span><span class="fl">0.02305587</span>, <span class="op">-</span><span class="fl">0.64315981</span>, <span class="op">-</span><span class="fl">0.68306653</span>, <span class="op">-</span><span class="fl">1.25393866</span>],</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.29077448</span>, <span class="op">-</span><span class="fl">0.04121674</span>, <span class="fl">0.01509932</span>, <span class="fl">0.13149906</span>],</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        [<span class="fl">0.57451867</span>, <span class="op">-</span><span class="fl">0.08895355</span>, <span class="fl">0.02190485</span>, <span class="fl">0.24535932</span>],</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> attentions <span class="op">@</span> W</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>Z</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 11.46394285, -13.18016471, -11.59340253, -17.04387829],
+       [ 11.62608573, -13.47454936, -11.87126395, -17.4926367 ]])</code></pre>
+</div>
+</div>
+<p>The image from <a href="https://jalammar.github.io/illustrated-transformer/">The Ilustrated Transformer</a> encapsulates all of this in a single image <img src="http://jalammar.github.io/images/t/transformer_multi-headed_self-attention-recap.png" class="img-fluid" alt="Attention"></p>
+</section>
+</section>
+</section>
+<section id="feed-forward-layer" class="level3">
+<h3 class="anchored" data-anchor-id="feed-forward-layer">5. Feed-forward layer</h3>
+<section id="basic-feed-forward-layer" class="level4">
+<h4 class="anchored" data-anchor-id="basic-feed-forward-layer">5.1 Basic feed-forward layer</h4>
+<p>After the self-attention layer, the encoder has a feed-forward neural network (FFN). This is a simple network with two linear transformations and a ReLU activation in between. The Illustrated Transformer blog post does not dive into it, so let me briefly explain a bit more. The goal of the FFN is to process and transformer the representation produced by the attention mechanism. The flow is usually as follows (see section 3.3 of the original paper):</p>
+<ol type="1">
+<li><strong>First linear layer:</strong> this usually expands the dimensionality of the input. For example, if the input dimension is 512, the output dimension might be 2048. This is done to allow the model to learn more complex functions. In our simple of example with dimension of 4, we’ll expand to 8.</li>
+<li><strong>ReLU activation:</strong> This is a non-linear activation function. It’s a simple function that returns 0 if the input is negative, and the input if it’s positive. This allows the model to learn non-linear functions. The math is as follows:</li>
+</ol>
+<p><span class="math display">\[
+\text{ReLU}(x) = \max(0, x)
+\]</span></p>
+<ol start="3" type="1">
+<li><strong>Second linear layer:</strong> This is the opposite of the first linear layer. It reduces the dimensionality back to the original dimension. In our example, we’ll reduce from 8 to 4.</li>
+</ol>
+<p>We can represent all of this as follows</p>
+<p><span class="math display">\[
+\text{FFN}(x) = \text{ReLU}(xW_1 + b_1)W_2 + b_2
+\]</span></p>
+<p>Just as a reminder, the input for this layer is the Z we calculated in the self-attention above. Here are the values as a reminder</p>
+<p><span class="math display">\[
+Z =
+\begin{bmatrix}
+11.46394281 &amp; -13.18016469 &amp; -11.59340253 &amp; -17.04387833 \\
+11.62608569 &amp; -13.47454934 &amp; -11.87126395 &amp; -17.49263674
+\end{bmatrix}
+\]</span></p>
+<p>Let’s now define some random values for the weight matrices and bias vectors. I’ll do it with code, but you can do it by hand if you feel patient!</p>
+<div id="1fee4bcb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>W1 <span class="op">=</span> np.random.randn(<span class="dv">4</span>, <span class="dv">8</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>W2 <span class="op">=</span> np.random.randn(<span class="dv">8</span>, <span class="dv">4</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> np.random.randn(<span class="dv">8</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> np.random.randn(<span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>And now let’s write the forward pass function</p>
+<div id="d001d38c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> relu(x):</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.maximum(<span class="dv">0</span>, x)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> feed_forward(Z, W1, b1, W2, b2):</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> relu(Z.dot(W1) <span class="op">+</span> b1).dot(W2) <span class="op">+</span> b2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="55976bde" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>output_encoder <span class="op">=</span> feed_forward(Z, W1, b1, W2, b2)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>output_encoder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ -3.24115016,  -9.7901049 , -29.42555675, -19.93135286],
+       [ -3.40199463,  -9.87245924, -30.05715408, -20.05271018]])</code></pre>
+</div>
+</div>
+</section>
+<section id="encapsulating-everything-the-random-encoder" class="level4">
+<h4 class="anchored" data-anchor-id="encapsulating-everything-the-random-encoder">5.2 Encapsulating everything: The Random Encoder</h4>
+<p>Let’s now write some code to have the multi-head attention and the feed-forward, all together in the encoder block.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The code optimizes for understanding and educational purposes, not for performance! Don’t judge too hard!</p>
+</div>
+</div>
+<div id="b903fbc3" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>d_embedding <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>d_key <span class="op">=</span> d_value <span class="op">=</span> d_query <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>d_feed_forward <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>n_attention_heads <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> attention(x, WQ, WK, WV):</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> x <span class="op">@</span> WK</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> x <span class="op">@</span> WV</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    Q <span class="op">=</span> x <span class="op">@</span> WQ</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Q <span class="op">@</span> K.T</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">/</span> np.sqrt(d_key)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> softmax(scores)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">@</span> V</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scores</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> multi_head_attention(x, WQs, WKs, WVs):</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    attentions <span class="op">=</span> np.concatenate(</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>        [attention(x, WQ, WK, WV) <span class="cf">for</span> WQ, WK, WV <span class="kw">in</span> <span class="bu">zip</span>(WQs, WKs, WVs)], axis<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    W <span class="op">=</span> np.random.randn(n_attention_heads <span class="op">*</span> d_value, d_embedding)</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> attentions <span class="op">@</span> W</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> feed_forward(Z, W1, b1, W2, b2):</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> relu(Z.dot(W1) <span class="op">+</span> b1).dot(W2) <span class="op">+</span> b2</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encoder_block(x, WQs, WKs, WVs, W1, b1, W2, b2):</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> multi_head_attention(x, WQs, WKs, WVs)</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> feed_forward(Z, W1, b1, W2, b2)</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Z</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> random_encoder_block(x):</span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>    WQs <span class="op">=</span> [</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_query) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>    WKs <span class="op">=</span> [</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_key) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>    WVs <span class="op">=</span> [</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_value) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>    W1 <span class="op">=</span> np.random.randn(d_embedding, d_feed_forward)</span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> np.random.randn(d_feed_forward)</span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>    W2 <span class="op">=</span> np.random.randn(d_feed_forward, d_embedding)</span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>    b2 <span class="op">=</span> np.random.randn(d_embedding)</span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> encoder_block(x, WQs, WKs, WVs, W1, b1, W2, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Recall that our input is the matrix E which has the positional encoding and the embedding.</p>
+<div id="63520e3e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>embedding</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[1.  , 3.  , 3.  , 5.  ],
+       [2.84, 3.99, 4.  , 6.  ]])</code></pre>
+</div>
+</div>
+<p>Let’s now pass this to our <code>random_encoder_block</code> function</p>
+<div id="11f33901" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>random_encoder_block(embedding)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ -71.76537515, -131.43316885,   13.2938131 ,   -4.26831998],
+       [ -72.04253781, -131.84091347,   13.3385937 ,   -4.32872015]])</code></pre>
+</div>
+</div>
+<p>Nice! This was just one encoder block. The original paper uses 6 encoders. The output of one encoder goes to the next, and so on:</p>
+<div id="bcd9d5f2" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encoder(x, n<span class="op">=</span><span class="dv">6</span>):</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> random_encoder_block(x)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>encoder(embedding)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_11906/1045810361.py:2: RuntimeWarning: overflow encountered in exp
+  return np.exp(x)/np.sum(np.exp(x),axis=1, keepdims=True)
+/tmp/ipykernel_11906/1045810361.py:2: RuntimeWarning: invalid value encountered in divide
+  return np.exp(x)/np.sum(np.exp(x),axis=1, keepdims=True)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[nan, nan, nan, nan],
+       [nan, nan, nan, nan]])</code></pre>
+</div>
+</div>
+</section>
+<section id="residual-and-layer-normalization" class="level4">
+<h4 class="anchored" data-anchor-id="residual-and-layer-normalization">5.3 Residual and Layer Normalization</h4>
+<p>Uh oh! We’re getting NaNs! It seems our values are too high, and when being passed to the next encoder, they end up being too high and exploding! This issue of having values that are too high is a common issue when training models. For example, when doing the backpropagation (the technique through which the models learn), the gradients can become too large and end up exploding; this is called <strong>gradient explosion</strong>. Without any kind of normalization, small changes in the input of early layers end up being amplified in later layers. This is a common problem in deep neural networks. There are two common techniques to mitigate this problem: residual connections and layer normalization (section 3.1 of the paper, barely mentioned).</p>
+<ul>
+<li><strong>Residual connections:</strong> Residual connections are simply adding the input of the layer to it output. For example, we add the initial embedding to the output of the attention. Residual connections mitigate the vanishing gradient problem. The intuition is that if the gradient is too small, we can just add the input to the output and the gradient will be larger. The math is very simple:</li>
+</ul>
+<p><span class="math display">\[
+\text{Residual}(x) = x + \text{Layer}(x)
+\]</span></p>
+<p>That’s it! We’ll do this to the output of the attention and the output of the feed-forward layer.</p>
+<ul>
+<li><strong>Layer normalization</strong> Layer normalization is a technique to normalize the inputs of a layer. It normalizes across the embedding dimension. The intuition is that we want to normalize the inputs of a layer so that they have a mean of 0 and a standard deviation of 1. This helps with the gradient flow. The math does not look so simple at a first glance.</li>
+</ul>
+<p><span class="math display">\[
+\text{LayerNorm}(x) = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \times \gamma + \beta
+\]</span></p>
+<p>Let’s explain each parameter:</p>
+<ul>
+<li><span class="math inline">\(\mu\)</span> is the mean of the embedding</li>
+<li><span class="math inline">\(\sigma\)</span> is the standard deviation of the embedding</li>
+<li><span class="math inline">\(\epsilon\)</span> is a small number to avoid division by zero. In case the standard deviation is 0, this small epsilon saves the day!</li>
+<li><span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\beta\)</span> are learned parameters that control scaling and shifting steps.</li>
+</ul>
+<p>Unlike batch normalization (no worries if you don’t know what it is), layer normalization normalizes across the embedding dimension - that means that each embedding will not be affected by other samples in the batch. The intuition is that we want to normalize the inputs of a layer so that they have a mean of 0 and a standard deviation of 1.</p>
+<p>Why do we add the learnable parameters <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\beta\)</span>? The reason is that we don’t want to lose the representational power of the layer. If we just normalize the inputs, we might lose some information. By adding the learnable parameters, we can learn to scale and shift the normalized values.</p>
+<p>Combining the equations, the equation for the whole encoder could look like this</p>
+<p><span class="math display">\[
+\text{Z}(x) = \text{LayerNorm}(x + \text{Attention}(x))
+\]</span></p>
+<p><span class="math display">\[
+\text{FFN}(x) = \text{ReLU}(xW_1 + b_1)W_2 + b_2
+\]</span></p>
+<p><span class="math display">\[
+\text{Encoder}(x) = \text{LayerNorm}(Z(x) + \text{FFN}(Z(x) + x))
+\]</span></p>
+<p>Let’s try with our example! Let’s go with E and Z values from before</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{E} + \text{Attention(E)} &amp;= \begin{bmatrix}
+1.0 &amp; 3.0 &amp; 3.0 &amp; 5.0 \\
+2.84 &amp; 3.99 &amp; 4.0 &amp; 6.0
+\end{bmatrix} + \begin{bmatrix}
+11.46394281 &amp; -13.18016469 &amp; -11.59340253 &amp; -17.04387833 \\
+11.62608569 &amp; -13.47454934 &amp; -11.87126395 &amp; -17.49263674
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+12.46394281 &amp; -10.18016469 &amp; -8.59340253 &amp; -12.04387833 \\
+14.46608569 &amp; -9.48454934 &amp; -7.87126395 &amp; -11.49263674
+\end{bmatrix}
+\end{align*}
+\]</span></p>
+<p>Let’s now calculate the layer normalization, we can divide it into three steps:</p>
+<ol type="1">
+<li>Compute mean and variance for each embedding.</li>
+<li>Normalize by substracting the mean of its row and dividing by the square root of its row variance (plus a small number to avoid division by zero).</li>
+<li>Scale and shift by multiplying by gamma and adding beta.</li>
+</ol>
+<section id="mean-and-variance" class="level5">
+<h5 class="anchored" data-anchor-id="mean-and-variance">5.3.1 Mean and variance</h5>
+<p>For the first embedding</p>
+<p><span class="math display">\[
+\begin{align*}
+\mu_1 &amp;= \frac{12.46394281-10.18016469-8.59340253-12.04387833}{4} = -4.58837568 \\
+\sigma^2 &amp;= \frac{\sum (x_i - \mu)^2}{N} \\
+&amp;= \frac{(12.46394281 - (-4.588375685))^2 + \ldots + (-12.04387833 - (-4.588375685))^2}{4} \\
+&amp;= \frac{393.67443005013}{4} \\
+&amp;= 98.418607512533 \\
+\sigma &amp;= \sqrt{98.418607512533} \\
+&amp;= 9.9206152789297
+\end{align*}
+\]</span></p>
+<p>We can do the same for the second embedding. We’ll skip the calculations but you get the hang of it.</p>
+<p><span class="math display">\[
+\begin{align*}
+\mu_2 &amp;= -3.59559109 \\
+\sigma_2 &amp;= 10.50653018
+\end{align*}
+\]</span></p>
+<p>Let’s confirm with Python</p>
+<div id="e75572f6" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>(embedding <span class="op">+</span> Z).mean(axis<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[-4.58837567],
+       [-3.59559107]])</code></pre>
+</div>
+</div>
+<div id="091881c7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>(embedding <span class="op">+</span> Z).std(axis<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 9.92061529],
+       [10.50653019]])</code></pre>
+</div>
+</div>
+<p>Amazing! Let’s now normalize</p>
+</section>
+<section id="normalize" class="level5">
+<h5 class="anchored" data-anchor-id="normalize">5.3.2 Normalize</h5>
+<p>For normalization, for each value in the embedding, we subsctract the mean and divide by the standard deviation. Epsilon is a very small value, such as 0.00001. We’ll assume <span class="math inline">\(\gamma=1\)</span> and <span class="math inline">\(\beta=0\)</span>, it simplifies things.</p>
+<p><span class="math display">\[\begin{align*}
+\text{normalized}_1 &amp;= \frac{12.46394281 - (-4.58837568)}{\sqrt{98.418607512533 + \epsilon}} \\
+&amp;= \frac{17.05231849}{9.9206152789297} \\
+&amp;= 1.718 \\
+\text{normalized}_2 &amp;= \frac{-10.18016469 - (-4.58837568)}{\sqrt{98.418607512533 + \epsilon}} \\
+&amp;= \frac{-5.59178901}{9.9206152789297} \\
+&amp;= -0.564 \\
+\text{normalized}_3 &amp;= \frac{-8.59340253 - (-4.58837568)}{\sqrt{98.418607512533 + \epsilon}} \\
+&amp;= \frac{-4.00502685}{9.9206152789297} \\
+&amp;= -0.404 \\
+\text{normalized}_4 &amp;= \frac{-12.04387833 - (-4.58837568)}{\sqrt{98.418607512533 + \epsilon}} \\
+&amp;= \frac{-7.45550265}{9.9206152789297} \\
+&amp;= -0.752
+\end{align*}\]</span></p>
+<p>We’ll skip the calculations by hand for the second embedding. Let’s confirm with code! Let’s re-define our <code>encoder_block</code> function with this change</p>
+<div id="af03350d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> layer_norm(x, epsilon<span class="op">=</span><span class="fl">1e-6</span>):</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    mean <span class="op">=</span> x.mean(axis<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    std <span class="op">=</span> x.std(axis<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (x <span class="op">-</span> mean) <span class="op">/</span> (std <span class="op">+</span> epsilon)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encoder_block(x, WQs, WKs, WVs, W1, b1, W2, b2):</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> multi_head_attention(x, WQs, WKs, WVs)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> layer_norm(Z <span class="op">+</span> x)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> feed_forward(Z, W1, b1, W2, b2)</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> layer_norm(output <span class="op">+</span> Z)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="0f2ceeba" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>layer_norm(Z <span class="op">+</span> embedding)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 1.71887693, -0.56365339, -0.40370747, -0.75151608],
+       [ 1.71909039, -0.56050453, -0.40695381, -0.75163205]])</code></pre>
+</div>
+</div>
+<p>It works! Let’s retry to pass the embedding through the six encoders.</p>
+<div id="f2a1f920" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encoder(x, n<span class="op">=</span><span class="dv">6</span>):</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> random_encoder_block(x)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>encoder(embedding)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[-0.335849  , -1.44504571,  1.21698183,  0.56391289],
+       [-0.33583947, -1.44504861,  1.21698606,  0.56390202]])</code></pre>
+</div>
+</div>
+<p>Amazing! These values make sense and we don’t get NaNs! The idea of the stack of encoders is that they output a continuous representation, z, that captures the meaning of the input sequence. This representation is then passed to the decoder, which will genrate an output sequence of symbols, one element at a time.</p>
+<p>Before diving into the decoder, here’s an image from Jay’s amazing blog post:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" class="img-fluid figure-img"></p>
+<figcaption>Encoder and decoder</figcaption>
+</figure>
+</div>
+<p>You should be able to explain each component at the left side! Quite impressive, right? Let’s now move to the decoder.</p>
+</section>
+</section>
+</section>
+</section>
+<section id="decoder" class="level2">
+<h2 class="anchored" data-anchor-id="decoder">Decoder</h2>
+<p>Most of the thing we learned for encoders will be used in the decoder as well! The decoder has two self-attention layers, one for the encoder and one for the decoder. The decoder also has a feed-forward layer. Let’s go through each of these.</p>
+<p>The decoder block receives two inputs: the output of the encoder and the generated output sequence. The output of the encoder is the representation of the input sequence. During inference, the generated output sequence starts with a special start-of-sequence token (SOS). During training, the target output sequence is the actual output sequence, shifted by one position. This will be clearer soon!</p>
+<p>Given the embedding generated by the encoder and the SOS token, the decoder will then generate the next token of the sequence, e.g.&nbsp;“hola”. The decoder is autoregressive, that means that the decoder will take the previously generated tokens and again generate the second token.</p>
+<ul>
+<li>Iteration 1: Input is SOS, output is “hola”</li>
+<li>Iteration 2: Input is SOS + “hola”, output is “mundo”</li>
+<li>Iteration 3: Input is SOS + “hola” + “mundo”, output is EOS</li>
+</ul>
+<p>Here, SOS is the start-of-sequence token and EOS is the end-of-sequence token. The decoder will stop when it generates the EOS token. It generates one token at a time. Note that all iterations use the embedding generated by the encoder.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>This autoregressive design makes decoder slow.</strong> The encoder is able to generate its embedding in a single forward pass while the decoder needs to do many forward passes. This is one of the reasons why architectures that only use the encoder (such as BERT or sentence similarity models) are much faster than decoder-only architectures (such as GPT-2 or BART).</p>
+</div>
+</div>
+<p>Let’s dive into each step! Just as the encoder, the decoder is composed of a stack of decoder blocks. The decoder block is a bit more complex than the encoder block. The general structure is:</p>
+<ol type="1">
+<li>(Masked) Self-attention layer</li>
+<li>Residual connection and layer normalization</li>
+<li>Encoder-decoder attention layer</li>
+<li>Residual connection and layer normalization</li>
+<li>Feed-forward layer</li>
+<li>Residual connection and layer normalization</li>
+</ol>
+<p>We’re already familiar with all the math from 1, 2, 3, 5 and 6. See the right side of the image below, you’ll see that all these blocks you already know (the right part):</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://arxiv.org/abs/1706.03762"><img src="transformer.png" class="img-fluid figure-img"></a></p>
+<figcaption>Transformer model from the original “attention is all you need” paper</figcaption>
+</figure>
+</div>
+<section id="embedding-the-text-1" class="level3">
+<h3 class="anchored" data-anchor-id="embedding-the-text-1">1. Embedding the text</h3>
+<p>The first text of the decoder is to embed the input tokens. The input token is <code>SOS</code>, so we’ll embed it. We’ll use the same embedding dimension as the encoder. Let’s assume the embedding vector for <code>SOS</code> is the following:</p>
+<p><span class="math display">\[
+E = \begin{bmatrix}
+1 &amp; 0 &amp; 0 &amp; 0
+\end{bmatrix}
+\]</span></p>
+</section>
+<section id="positional-encoding-1" class="level3">
+<h3 class="anchored" data-anchor-id="positional-encoding-1">2. Positional encoding</h3>
+<p>We’ll now add the positional encoding to the embedding, just as we did for the encoder. Given it’s the same position as “Hello”, we’ll have same positional encoding as we did before:</p>
+<ul>
+<li>i = 0 (even): PE(0,0) = sin(0 / 10000^(0 / 4)) = sin(0) = 0</li>
+<li>i = 1 (odd): PE(0,1) = cos(0 / 10000^(2*1 / 4)) = cos(0) = 1</li>
+<li>i = 2 (even): PE(0,2) = sin(0 / 10000^(2*2 / 4)) = sin(0) = 0</li>
+<li>i = 3 (odd): PE(0,3) = cos(0 / 10000^(2*3 / 4)) = cos(0) = 1</li>
+</ul>
+</section>
+<section id="add-positional-encoding-and-embedding-1" class="level3">
+<h3 class="anchored" data-anchor-id="add-positional-encoding-and-embedding-1">3. Add positional encoding and embedding</h3>
+<p>Adding the positional encoding to the embedding is done by adding the two vectors together:</p>
+<p><span class="math display">\[
+E = \begin{bmatrix}
+1 &amp; 1 &amp; 0 &amp; 1
+\end{bmatrix}
+\]</span></p>
+</section>
+<section id="self-attention-1" class="level3">
+<h3 class="anchored" data-anchor-id="self-attention-1">4. Self-attention</h3>
+<p>The first step within the decoder block is the self-attention mechanism. Luckily, we have some code for this and can just use it!</p>
+<div id="14fb8de7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>d_embedding <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>n_attention_heads <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>E <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>]])</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>WQs <span class="op">=</span> [np.random.randn(d_embedding, d_query) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)]</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>WKs <span class="op">=</span> [np.random.randn(d_embedding, d_key) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)]</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>WVs <span class="op">=</span> [np.random.randn(d_embedding, d_value) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)]</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>Z_self_attention <span class="op">=</span> multi_head_attention(E, WQs, WKs, WVs)</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>Z_self_attention</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 2.19334924, 10.61851198, -4.50089666, -2.76366551]])</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Things are quite simple for inference. For training, things are a bit tricky. During training, we use unlabeled data: just a bunch of text data, frequentyl scraped from the web. While the encoder’s goal is to capture all information of the input, the decoder’s goal is to predict the most likely next token. This means that the decoder can only use the tokens that have been generated so far (it cannot cheat and see the next tokens).</p>
+<p>Because of this, we use masked self-attention: we mask the tokens that have not been generated yet. This is done by setting the attention scores to -inf. This is done in the original paper (section 3.2.3.1). We’ll skip this for now, but it’s important to keep in mind that the decoder is a bit more complex during training.</p>
+</div>
+</div>
+</section>
+<section id="residual-connection-and-layer-normalization" class="level3">
+<h3 class="anchored" data-anchor-id="residual-connection-and-layer-normalization">5. Residual connection and layer normalization</h3>
+<p>Nothing magical here, we just add the input to the output of the self-attention and apply layer normalization. We’ll use the same code as before.</p>
+<div id="888c3adb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>Z_self_attention <span class="op">=</span> layer_norm(Z_self_attention <span class="op">+</span> E)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>Z_self_attention</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 0.17236212,  1.54684892, -1.0828824 , -0.63632864]])</code></pre>
+</div>
+</div>
+</section>
+<section id="encoder-decoder-attention" class="level3">
+<h3 class="anchored" data-anchor-id="encoder-decoder-attention">6. Encoder-decoder attention</h3>
+<p><strong>This part is the new one!</strong> If you were wondering where do the encoder-generated embeddings come in, this is their moment to shine!</p>
+<p>Let’s assume the output of the encoder is the following matrix</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+-1.5 &amp; 1.0 &amp; -0.8 &amp; 1.5 \\
+1.0 &amp; -1.0 &amp; -0.5 &amp; 1.0
+\end{bmatrix}
+\]</span></p>
+<p>In the self-attention mechanism, we calculate the queries, keys, and values from the input embedding.</p>
+<p>In the encoder-decoder attention, we calculate the queries from the previous decoder layer and the keys and values from the encoder output! All the math is the same as before; the only difference is what embedding to use for the queries. Let’s look at some code</p>
+<div id="0c8c535d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encoder_decoder_attention(encoder_output, attention_input, WQ, WK, WV):</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The next three lines are the key difference!</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> encoder_output <span class="op">@</span> WK    <span class="co"># Note that now we pass the previous encoder output!</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> encoder_output <span class="op">@</span> WV    <span class="co"># Note that now we pass the previous encoder output!</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>    Q <span class="op">=</span> attention_input <span class="op">@</span> WQ   <span class="co"># Same as self-attention</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This stays the same</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> Q <span class="op">@</span> K.T</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">/</span> np.sqrt(d_key)</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> softmax(scores)</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> scores <span class="op">@</span> V</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scores</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> multi_head_encoder_decoder_attention(</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>    encoder_output, attention_input, WQs, WKs, WVs</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Note that now we pass the previous encoder output!</span></span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>    attentions <span class="op">=</span> np.concatenate(</span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>            encoder_decoder_attention(</span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>                encoder_output, attention_input, WQ, WK, WV</span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> WQ, WK, WV <span class="kw">in</span> <span class="bu">zip</span>(WQs, WKs, WVs)</span>
+<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a>        axis<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>    W <span class="op">=</span> np.random.randn(n_attention_heads <span class="op">*</span> d_value, d_embedding)</span>
+<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> attentions <span class="op">@</span> W</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="1d3380ae" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>WQs <span class="op">=</span> [np.random.randn(d_embedding, d_query) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)]</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>WKs <span class="op">=</span> [np.random.randn(d_embedding, d_key) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)]</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>WVs <span class="op">=</span> [np.random.randn(d_embedding, d_value) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)]</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>encoder_output <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.8</span>, <span class="fl">1.5</span>], [<span class="fl">1.0</span>, <span class="op">-</span><span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.0</span>]])</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>Z_encoder_decoder <span class="op">=</span> multi_head_encoder_decoder_attention(</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>    encoder_output, Z_self_attention, WQs, WKs, WVs</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>Z_encoder_decoder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 1.57651431,  4.92489307, -0.08644448, -0.46776051]])</code></pre>
+</div>
+</div>
+<p>This worked! You might be asking “why do we do this?”. The reason is that we want the decoder to focus on the relevant parts of the input text (e.g., “hello world”). The encoder-decoder attention allows each position in the decoder to attend over all positions in the input sequence. This is very helpful for tasks such as translation, where the decoder needs to focus on the relevant parts of the input sequence. The decoder will learn to focus on the relevant parts of the input sequence by learning to generate the correct output tokens. This is a very powerful mechanism!</p>
+</section>
+<section id="residual-connection-and-layer-normalization-1" class="level3">
+<h3 class="anchored" data-anchor-id="residual-connection-and-layer-normalization-1">7. Residual connection and layer normalization</h3>
+<p>Same as before!</p>
+<div id="a5645dc1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>Z_encoder_decoder <span class="op">=</span> layer_norm(Z_encoder_decoder <span class="op">+</span> Z_self_attention)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>Z_encoder_decoder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[-0.44406723,  1.6552893 , -0.19984632, -1.01137575]])</code></pre>
+</div>
+</div>
+</section>
+<section id="feed-forward-layer-1" class="level3">
+<h3 class="anchored" data-anchor-id="feed-forward-layer-1">8. Feed-forward layer</h3>
+<p>Once again, same as before! I’ll also do the residual connection and layer normalization after it.</p>
+<div id="cd016208" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>W1 <span class="op">=</span> np.random.randn(<span class="dv">4</span>, <span class="dv">8</span>)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>W2 <span class="op">=</span> np.random.randn(<span class="dv">8</span>, <span class="dv">4</span>)</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> np.random.randn(<span class="dv">8</span>)</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> np.random.randn(<span class="dv">4</span>)</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> layer_norm(feed_forward(Z_encoder_decoder, W1, b1, W2, b2) <span class="op">+</span> Z_encoder_decoder)</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>output</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[-0.97650182,  0.81470137, -2.79122044, -3.39192873]])</code></pre>
+</div>
+</div>
+</section>
+<section id="encapsulating-everything-the-random-decoder" class="level3">
+<h3 class="anchored" data-anchor-id="encapsulating-everything-the-random-decoder">9. Encapsulating everything: The Random Decoder</h3>
+<p>Let’s write the code for a single decoder block. The main change is that we now have an additional attention mechanism.</p>
+<div id="17f3f866" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>d_embedding <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>d_key <span class="op">=</span> d_value <span class="op">=</span> d_query <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>d_feed_forward <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>n_attention_heads <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>encoder_output <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.8</span>, <span class="fl">1.5</span>], [<span class="fl">1.0</span>, <span class="op">-</span><span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.0</span>]])</span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> decoder_block(</span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>    x,</span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>    encoder_output,</span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>    WQs_self_attention, WKs_self_attention, WVs_self_attention,</span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>    WQs_ed_attention, WKs_ed_attention, WVs_ed_attention,</span>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>    W1, b1, W2, b2,</span>
+<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Same as before</span></span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> multi_head_attention(</span>
+<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a>        x, WQs_self_attention, WKs_self_attention, WVs_self_attention</span>
+<span id="cb64-17"><a href="#cb64-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb64-18"><a href="#cb64-18" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> layer_norm(Z <span class="op">+</span> x)</span>
+<span id="cb64-19"><a href="#cb64-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-20"><a href="#cb64-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The next three lines are the key difference!</span></span>
+<span id="cb64-21"><a href="#cb64-21" aria-hidden="true" tabindex="-1"></a>    Z_encoder_decoder <span class="op">=</span> multi_head_encoder_decoder_attention(</span>
+<span id="cb64-22"><a href="#cb64-22" aria-hidden="true" tabindex="-1"></a>        encoder_output, Z, WQs_ed_attention, WKs_ed_attention, WVs_ed_attention</span>
+<span id="cb64-23"><a href="#cb64-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb64-24"><a href="#cb64-24" aria-hidden="true" tabindex="-1"></a>    Z_encoder_decoder <span class="op">=</span> layer_norm(Z_encoder_decoder <span class="op">+</span> Z)</span>
+<span id="cb64-25"><a href="#cb64-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-26"><a href="#cb64-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Same as before</span></span>
+<span id="cb64-27"><a href="#cb64-27" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> feed_forward(Z_encoder_decoder, W1, b1, W2, b2)</span>
+<span id="cb64-28"><a href="#cb64-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> layer_norm(output <span class="op">+</span> Z_encoder_decoder)</span>
+<span id="cb64-29"><a href="#cb64-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-30"><a href="#cb64-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> random_decoder_block(x, encoder_output):</span>
+<span id="cb64-31"><a href="#cb64-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Just a bunch of random initializations</span></span>
+<span id="cb64-32"><a href="#cb64-32" aria-hidden="true" tabindex="-1"></a>    WQs_self_attention <span class="op">=</span> [</span>
+<span id="cb64-33"><a href="#cb64-33" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_query) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb64-34"><a href="#cb64-34" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb64-35"><a href="#cb64-35" aria-hidden="true" tabindex="-1"></a>    WKs_self_attention <span class="op">=</span> [</span>
+<span id="cb64-36"><a href="#cb64-36" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_key) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb64-37"><a href="#cb64-37" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb64-38"><a href="#cb64-38" aria-hidden="true" tabindex="-1"></a>    WVs_self_attention <span class="op">=</span> [</span>
+<span id="cb64-39"><a href="#cb64-39" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_value) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb64-40"><a href="#cb64-40" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb64-41"><a href="#cb64-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-42"><a href="#cb64-42" aria-hidden="true" tabindex="-1"></a>    WQs_ed_attention <span class="op">=</span> [</span>
+<span id="cb64-43"><a href="#cb64-43" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_query) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb64-44"><a href="#cb64-44" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb64-45"><a href="#cb64-45" aria-hidden="true" tabindex="-1"></a>    WKs_ed_attention <span class="op">=</span> [</span>
+<span id="cb64-46"><a href="#cb64-46" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_key) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb64-47"><a href="#cb64-47" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb64-48"><a href="#cb64-48" aria-hidden="true" tabindex="-1"></a>    WVs_ed_attention <span class="op">=</span> [</span>
+<span id="cb64-49"><a href="#cb64-49" aria-hidden="true" tabindex="-1"></a>        np.random.randn(d_embedding, d_value) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_attention_heads)</span>
+<span id="cb64-50"><a href="#cb64-50" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb64-51"><a href="#cb64-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-52"><a href="#cb64-52" aria-hidden="true" tabindex="-1"></a>    W1 <span class="op">=</span> np.random.randn(d_embedding, d_feed_forward)</span>
+<span id="cb64-53"><a href="#cb64-53" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> np.random.randn(d_feed_forward)</span>
+<span id="cb64-54"><a href="#cb64-54" aria-hidden="true" tabindex="-1"></a>    W2 <span class="op">=</span> np.random.randn(d_feed_forward, d_embedding)</span>
+<span id="cb64-55"><a href="#cb64-55" aria-hidden="true" tabindex="-1"></a>    b2 <span class="op">=</span> np.random.randn(d_embedding)</span>
+<span id="cb64-56"><a href="#cb64-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-57"><a href="#cb64-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-58"><a href="#cb64-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> decoder_block(</span>
+<span id="cb64-59"><a href="#cb64-59" aria-hidden="true" tabindex="-1"></a>        x, encoder_output,</span>
+<span id="cb64-60"><a href="#cb64-60" aria-hidden="true" tabindex="-1"></a>        WQs_self_attention, WKs_self_attention, WVs_self_attention,</span>
+<span id="cb64-61"><a href="#cb64-61" aria-hidden="true" tabindex="-1"></a>        WQs_ed_attention, WKs_ed_attention, WVs_ed_attention,</span>
+<span id="cb64-62"><a href="#cb64-62" aria-hidden="true" tabindex="-1"></a>        W1, b1, W2, b2,</span>
+<span id="cb64-63"><a href="#cb64-63" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="ae5b3375" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> decoder(x, decoder_embedding, n<span class="op">=</span><span class="dv">6</span>):</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> random_decoder_block(x, decoder_embedding)</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>decoder(E, encoder_output)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[ 0.25919176,  1.49913566, -1.14331487, -0.61501256],
+       [ 0.25956188,  1.49896896, -1.14336934, -0.61516151]])</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="generating-the-output-sequence" class="level2">
+<h2 class="anchored" data-anchor-id="generating-the-output-sequence">Generating the output sequence</h2>
+<p>We have all the building blocks! Let’s now generate the output sequence.</p>
+<ul>
+<li>We have the <strong>encoder</strong>, which takes the input sequence and generates its rich representation. It’s composed of a stack of encoder blocks.</li>
+<li>We have the <strong>decoder</strong>, which takes the encoder output and generated tokens, and generates the output sequence. It’s composed of a stack of decoder blocks.</li>
+</ul>
+<p>How do we go from the decoder’s output to a word? We need to add a final linear layer and a softmax layer on top of the decoder. The whole algorithm looks like this:</p>
+<ol type="1">
+<li><strong>Encoder Processing:</strong> The encoder receives the input sequence and generates a contextualized representation of the entire sequence, utilizing a stack of encoder blocks.</li>
+<li><strong>Decoder Initiation:</strong> The decoding process begins with the embedding of the SOS (Start of Sequence) token, combined with the encoder’s output.</li>
+<li><strong>Decoder Operation:</strong> The decoder uses the encoder’s output and the embeddings of all previously generated tokens to produce a new list of embeddings.</li>
+<li><strong>Linear Layer for Logits</strong> A linear layer is applied to the latest output embedding from the decoder to generate logits, representing raw predictions for the next token.</li>
+<li><strong>Softmax for Probabilities:</strong> These logits are then passed through a softmax layer, which converts them into a probability distribution over potential next tokens.</li>
+<li><strong>Iterative Token Generation:</strong> This process is repeated, with each step involving the decoder generating the next token based on the cumulative embeddings of previously generated tokens and the initial encoder output.</li>
+<li><strong>Sequence Completion:</strong> The generation continues through these steps until the EOS (End of Sequence) token is produced or a predefined maximum sequence length is reached.</li>
+</ol>
+<p>This is mentioned in the section 3.4 of the paper.</p>
+<section id="linear-layer" class="level3">
+<h3 class="anchored" data-anchor-id="linear-layer">1. Linear layer</h3>
+<p>The linear layer is a simple linear transformation. It takes the decoder’s output and transforms it into a vector of size <code>vocab_size</code>. This is the size of the vocabulary. For example, if we have a vocabulary of 10000 words, the linear layer will transform the decoder’s output into a vector of size 10000. This vector will contain the probability of each word being the next word in the sequence. For simplicity, let’s go with a vocabulary of 10 words and assume the first decoder output is a very simple vector: [1, 0, 1, 0]. We’ll use random weights and biases matrices of the size <code>vocab_size</code> x <code>decoder_output_size</code>.</p>
+<div id="0d2e4026" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear(x, W, b):</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.dot(x, W) <span class="op">+</span> b</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> linear([<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>], np.random.randn(<span class="dv">4</span>, <span class="dv">10</span>), np.random.randn(<span class="dv">10</span>))</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([ 0.06900542, -1.81351091, -1.3122958 , -0.33197364,  2.54767851,
+       -1.55188231,  0.82907169,  0.85910931, -0.32982856, -1.26792439])</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>What do we use as input for the linear layer? The decoder will output one embedding for each token in the sequence. The input for the linear layer will be the last generated embedding. The last embedding encapsulates information to the entire sequence up to that point, so it contains all the information needed to generate the next token. This means that each output embedding from the decoder contains information about the entire sequence up to that point.</p>
+</div>
+</div>
+</section>
+<section id="softmax" class="level3">
+<h3 class="anchored" data-anchor-id="softmax">2. Softmax</h3>
+<p>These are called logits but they are not easily interpretable. We need to apply a softmax function to obtain the probabilities.</p>
+<div id="5bb5c83c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>softmax(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[0.01602618, 0.06261303, 0.38162024, 0.03087794, 0.0102383 ,
+        0.00446011, 0.01777314, 0.00068275, 0.46780959, 0.00789871]])</code></pre>
+</div>
+</div>
+<p>This is giving us probabilities! Let’a assume the vocabulary is the following:</p>
+<p><span class="math display">\[
+\text{vocab} = \begin{bmatrix}
+\text{hello} &amp; \text{mundo} &amp; \text{world} &amp; \text{how} &amp; \text{?} &amp; \text{EOS} &amp; \text{SOS} &amp; \text{a} &amp; \text{hola} &amp; \text{c}
+\end{bmatrix}
+\]</span></p>
+<p>The above tells us that the probabilities are</p>
+<ul>
+<li>hello: 0.01602618</li>
+<li>mundo: 0.06261303</li>
+<li>world: 0.38162024</li>
+<li>how: 0.03087794</li>
+<li>?: 0.0102383</li>
+<li>EOS: 0.00446011</li>
+<li>SOS: 0.01777314</li>
+<li>a: 0.00068275</li>
+<li>hola: 0.46780959</li>
+<li>c: 0.00789871</li>
+</ul>
+<p>From these, the most likely next token is “hola”. Picking always the most likely token is called greedy decoding. This is not always the best approach, as it might lead to suboptimal results, but we won’t dive into generation techniques at the moment. If you want to learn more about it, check out this amazing <a href="https://huggingface.co/blog/how-to-generate">blog post</a>.</p>
+</section>
+<section id="the-random-encoder-decoder-transformer" class="level3">
+<h3 class="anchored" data-anchor-id="the-random-encoder-decoder-transformer">3. The Random Encoder-Decoder Transformer</h3>
+<p>Let’s write the whole code for this! Let’s define a dictionary that maps the words to their initial embeddings. Note that this is also learned during training, but we’ll use random values for now.</p>
+<div id="eaff46ac" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>vocabulary <span class="op">=</span> [</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hello"</span>,</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mundo"</span>,</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"world"</span>,</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"how"</span>,</span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"?"</span>,</span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"EOS"</span>,</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SOS"</span>,</span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span>,</span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hola"</span>,</span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"c"</span>,</span>
+<span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a>embedding_reps <span class="op">=</span> np.random.randn(<span class="dv">10</span>, <span class="dv">4</span>)</span>
+<span id="cb71-14"><a href="#cb71-14" aria-hidden="true" tabindex="-1"></a>vocabulary_embeddings <span class="op">=</span> {</span>
+<span id="cb71-15"><a href="#cb71-15" aria-hidden="true" tabindex="-1"></a>    word: embedding_reps[i] <span class="cf">for</span> i, word <span class="kw">in</span> <span class="bu">enumerate</span>(vocabulary)</span>
+<span id="cb71-16"><a href="#cb71-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb71-17"><a href="#cb71-17" aria-hidden="true" tabindex="-1"></a>vocabulary_embeddings</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'hello': array([-0.32106406,  2.09332588, -0.77994069,  0.92639774]),
+ 'mundo': array([-0.59563791, -0.63389256,  1.70663692, -0.99495115]),
+ 'world': array([ 1.35581862, -0.0323546 ,  2.76696887,  0.83069982]),
+ 'how': array([-0.52975474,  0.94439644,  0.80073818, -1.50135518]),
+ '?': array([-0.88116833,  0.13995055,  2.01827674, -0.52554391]),
+ 'EOS': array([1.12207024, 1.40905796, 1.22231714, 0.02267638]),
+ 'SOS': array([-0.60624082, -0.67560165,  0.77152125,  0.63472247]),
+ 'a': array([ 1.67622229, -0.20319309, -0.18324905, -0.24258774]),
+ 'hola': array([ 1.07809402, -0.83846408, -0.33448976,  0.28995976]),
+ 'c': array([ 0.65643157,  0.24935726, -0.80839751, -1.87156293])}</code></pre>
+</div>
+</div>
+<p>And now let’s write our random <code>generate</code> method that generates tokens autorergressively.</p>
+<div id="bc0cbdbc" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(input_sequence, max_iters<span class="op">=</span><span class="dv">3</span>):</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We first encode the inputs into embeddings</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This skips the positional encoding step for simplicity</span></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>    embedded_inputs <span class="op">=</span> [</span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>        vocabulary_embeddings[token] <span class="cf">for</span> token <span class="kw">in</span> input_sequence</span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Embedding representation (encoder input)"</span>, embedded_inputs)</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We then generate an embedding representation</span></span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a>    encoder_output <span class="op">=</span> encoder(embedded_inputs)</span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Embedding generated by encoder (encoder output)"</span>, encoder_output)</span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We initialize the decoder output with the embedding of the start token</span></span>
+<span id="cb73-14"><a href="#cb73-14" aria-hidden="true" tabindex="-1"></a>    sequence_embeddings <span class="op">=</span> [vocabulary_embeddings[<span class="st">"SOS"</span>]]</span>
+<span id="cb73-15"><a href="#cb73-15" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> <span class="st">"SOS"</span></span>
+<span id="cb73-16"><a href="#cb73-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb73-17"><a href="#cb73-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Random matrices for the linear layer</span></span>
+<span id="cb73-18"><a href="#cb73-18" aria-hidden="true" tabindex="-1"></a>    W_linear <span class="op">=</span> np.random.randn(d_embedding, <span class="bu">len</span>(vocabulary))</span>
+<span id="cb73-19"><a href="#cb73-19" aria-hidden="true" tabindex="-1"></a>    b_linear <span class="op">=</span> np.random.randn(<span class="bu">len</span>(vocabulary))</span>
+<span id="cb73-20"><a href="#cb73-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-21"><a href="#cb73-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We limit number of decoding steps to avoid too long sequences without EOS</span></span>
+<span id="cb73-22"><a href="#cb73-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(max_iters):</span>
+<span id="cb73-23"><a href="#cb73-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Decoder step</span></span>
+<span id="cb73-24"><a href="#cb73-24" aria-hidden="true" tabindex="-1"></a>        decoder_output <span class="op">=</span> decoder(sequence_embeddings, encoder_output)</span>
+<span id="cb73-25"><a href="#cb73-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-26"><a href="#cb73-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Only use the last output for prediction</span></span>
+<span id="cb73-27"><a href="#cb73-27" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> linear(decoder_output[<span class="op">-</span><span class="dv">1</span>], W_linear, b_linear)</span>
+<span id="cb73-28"><a href="#cb73-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># We wrap logits in a list as our softmax expects batches/2D array</span></span>
+<span id="cb73-29"><a href="#cb73-29" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> softmax([logits])</span>
+<span id="cb73-30"><a href="#cb73-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-31"><a href="#cb73-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># We get the most likely next token</span></span>
+<span id="cb73-32"><a href="#cb73-32" aria-hidden="true" tabindex="-1"></a>        next_token <span class="op">=</span> vocabulary[np.argmax(probs)]</span>
+<span id="cb73-33"><a href="#cb73-33" aria-hidden="true" tabindex="-1"></a>        sequence_embeddings.append(vocabulary_embeddings[next_token])</span>
+<span id="cb73-34"><a href="#cb73-34" aria-hidden="true" tabindex="-1"></a>        output <span class="op">+=</span> <span class="st">" "</span> <span class="op">+</span> next_token</span>
+<span id="cb73-35"><a href="#cb73-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-36"><a href="#cb73-36" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(</span>
+<span id="cb73-37"><a href="#cb73-37" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Iteration"</span>, i, </span>
+<span id="cb73-38"><a href="#cb73-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">"next token"</span>, next_token,</span>
+<span id="cb73-39"><a href="#cb73-39" aria-hidden="true" tabindex="-1"></a>            <span class="st">"with probability of"</span>, np.<span class="bu">max</span>(probs),</span>
+<span id="cb73-40"><a href="#cb73-40" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb73-41"><a href="#cb73-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-42"><a href="#cb73-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># If the next token is the end token, we return the sequence</span></span>
+<span id="cb73-43"><a href="#cb73-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> next_token <span class="op">==</span> <span class="st">"EOS"</span>:</span>
+<span id="cb73-44"><a href="#cb73-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> output</span>
+<span id="cb73-45"><a href="#cb73-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-46"><a href="#cb73-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output, sequence_embeddings</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Let’s run this now!</p>
+<div id="c47b03f2" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>generate([<span class="st">"hello"</span>, <span class="st">"world"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Embedding representation (encoder input) [array([-0.32106406,  2.09332588, -0.77994069,  0.92639774]), array([ 1.35581862, -0.0323546 ,  2.76696887,  0.83069982])]
+Embedding generated by encoder (encoder output) [[ 1.14747807 -1.5941759   0.36847675  0.07822107]
+ [ 1.14747705 -1.59417696  0.36847441  0.07822551]]
+Iteration 0 next token hola with probability of 0.4327111653266739
+Iteration 1 next token mundo with probability of 0.4411354383451089
+Iteration 2 next token world with probability of 0.4746898792307499</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>('SOS hola mundo world',
+ [array([-0.60624082, -0.67560165,  0.77152125,  0.63472247]),
+  array([ 1.07809402, -0.83846408, -0.33448976,  0.28995976]),
+  array([-0.59563791, -0.63389256,  1.70663692, -0.99495115]),
+  array([ 1.35581862, -0.0323546 ,  2.76696887,  0.83069982])])</code></pre>
+</div>
+</div>
+<p>Ok, so we got the tokens “how”, “a”, and “c”. This is not a good translation, but it’s expected! We only used random weights!</p>
+<p>I suggest you to look again in detail at the whole encoder-decoder architecture from the original paper:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="transformer.png" class="img-fluid figure-img"></p>
+<figcaption>Encoder and decoder</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>I hope that was fun and informational! We covered a lot of ground. Wait…was that it? And the answer is, mostly, yes! New transformer architectures add lots of tricks, but the core of the transformer is what we just covered. Depending on what task you want to solve, you can also only the encoder or the decoder. For example, for understanding-heavy tasks such as classification, you can use the encoder stack with a linear layer on top. For generation-heavy tasks such as translation, you can use the encoder and decoder stacks. And finally, for free generation, as in ChatGPT or Mistral, you can use only the decoder stack.</p>
+<p>Of course, we also did lots of simplifications. Let’s briefly check which were the numbers in the original transformer paper:</p>
+<ul>
+<li>Embedding dimension: 512 (4 in our example)</li>
+<li>Number of encoders: 6 (6 in our example)</li>
+<li>Number of decoders: 6 (6 in our example)</li>
+<li>Feed-forward dimension: 2048 (8 in our example)</li>
+<li>Number of attention heads: 8 (2 in our example)</li>
+<li>Attention dimension: 64 (3 in our example)</li>
+</ul>
+<p>We just covered lots of topics, but it’s quite interesting we can achieve impressive results by scaling up this math and doing smart training. We didn’t cover training in this blog post as the goal was to understand the math when using an existing model, but I hope this provided strong foundations for jumping into the training part. I hope you enjoyed this blog post!</p>
+<p>You can also find a more formal document with the math in <a href="https://johnthickstun.com/docs/transformers.pdf">this PDF</a> (recommended by HackerNews folks).</p>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<p>Here are some exercises to practice your understanding of the transformer.</p>
+<ol type="1">
+<li>What is the purpose of the positional encoding?</li>
+<li>How does self-attention and encoder-decoder attention differ?</li>
+<li>What would happen if our attention dimension was too small? What about if it was too large?</li>
+<li>Briefly describe the structure of a feed-forward layer.</li>
+<li>Why is the decoder slower than the encoder?</li>
+<li>What is the purpose of the residual connections and layer normalization?</li>
+<li>How do we go from the decoder output to probabilities?</li>
+<li>Why is picking the most likely next token every single time problematic?</li>
+</ol>
+</section>
+<section id="resources" class="level2">
+<h2 class="anchored" data-anchor-id="resources">Resources</h2>
+<ul>
+<li><a href="http://jalammar.github.io/illustrated-transformer/">The Illustrated Transformer</a></li>
+<li><a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a></li>
+<li><a href="http://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a></li>
+<li><a href="https://huggingface.co/learn/nlp-course/chapter1/1">Hugging Face free NLP course</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/osanseviero\.github\.io\/hackerllama");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="osanseviero/hackerllama" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

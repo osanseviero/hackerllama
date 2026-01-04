@@ -1,0 +1,14 @@
+[
+  {
+    "listing": "/blog/index.html",
+    "items": [
+      "/blog/posts/minimal-quantize-intro/index.html",
+      "/blog/posts/llm_evals/index.html",
+      "/blog/posts/sentence_embeddings2/index.html",
+      "/blog/posts/hitchhiker_guide/index.html",
+      "/blog/posts/sentence_embeddings/index.html",
+      "/blog/posts/random_transformer/index.html",
+      "/blog/posts/gpu-poor-strike-back/index.html"
+    ]
+  }
+]

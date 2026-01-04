@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-01-07">
+<meta name="description" content="Everything you wanted to know about sentence embeddings (and maybe a bit more)">
+
+<title>Sentence Embeddings. Introduction to Sentence Embeddings – hackerllama</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../../hacker.png" rel="icon" type="image/png">
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b758ccaa5987ceb1b75504551e579abf.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-7f54657f98cfd61baa5fc740dde4b5a5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-17d01b5babc88cbee53e37b4dd766b3a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-SF72633X8L"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-SF72633X8L', { 'anonymize_ip': true});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../styles.css">
+<meta property="og:title" content="Sentence Embeddings. Introduction to Sentence Embeddings – hackerllama">
+<meta property="og:description" content="Everything you wanted to know about sentence embeddings (and maybe a bit more)">
+<meta property="og:image" content="https://osanseviero.github.io/hackerllama/blog/posts/sentence_embeddings/embedding.png">
+<meta property="og:site_name" content="hackerllama">
+<meta property="og:image:height" content="684">
+<meta property="og:image:width" content="1460">
+<meta name="twitter:title" content="Sentence Embeddings. Introduction to Sentence Embeddings – hackerllama">
+<meta name="twitter:description" content="Everything you wanted to know about sentence embeddings (and maybe a bit more)">
+<meta name="twitter:image" content="https://osanseviero.github.io/hackerllama/blog/posts/sentence_embeddings/embedding.png">
+<meta name="twitter:image-height" content="684">
+<meta name="twitter:image-width" content="1460">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">hackerllama</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../resources.html"> 
+<span class="menu-text">Misc Resources</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/osanseviero"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/omarsanseviero/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/osanseviero"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../../blog/index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-tldr" id="toc-the-tldr" class="nav-link active" data-scroll-target="#the-tldr">The TL;DR</a></li>
+  <li><a href="#from-word-embeddings-to-sentence-embeddings" id="toc-from-word-embeddings-to-sentence-embeddings" class="nav-link" data-scroll-target="#from-word-embeddings-to-sentence-embeddings">From word embeddings to sentence embeddings</a>
+  <ul>
+  <li><a href="#word2vec-and-glove" id="toc-word2vec-and-glove" class="nav-link" data-scroll-target="#word2vec-and-glove">Word2Vec and GloVe</a></li>
+  <li><a href="#word-embeddings-with-transformers" id="toc-word-embeddings-with-transformers" class="nav-link" data-scroll-target="#word-embeddings-with-transformers">Word Embeddings with Transformers</a></li>
+  <li><a href="#sentence-embeddings" id="toc-sentence-embeddings" class="nav-link" data-scroll-target="#sentence-embeddings">Sentence Embeddings</a>
+  <ul>
+  <li><a href="#cls-pooling" id="toc-cls-pooling" class="nav-link" data-scroll-target="#cls-pooling">[CLS] Pooling</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sentence-transformers" id="toc-sentence-transformers" class="nav-link" data-scroll-target="#sentence-transformers">Sentence Transformers</a>
+  <ul>
+  <li><a href="#using-the-transformers-library" id="toc-using-the-transformers-library" class="nav-link" data-scroll-target="#using-the-transformers-library">Using the transformers library</a></li>
+  <li><a href="#using-the-sentence-transformers-library" id="toc-using-the-sentence-transformers-library" class="nav-link" data-scroll-target="#using-the-sentence-transformers-library">Using the sentence-transformers library</a></li>
+  <li><a href="#embedding-dimensions" id="toc-embedding-dimensions" class="nav-link" data-scroll-target="#embedding-dimensions">Embedding dimensions</a></li>
+  <li><a href="#sequence-length" id="toc-sequence-length" class="nav-link" data-scroll-target="#sequence-length">Sequence length</a></li>
+  </ul></li>
+  <li><a href="#application-1.-finding-most-similar-quora-duplicate" id="toc-application-1.-finding-most-similar-quora-duplicate" class="nav-link" data-scroll-target="#application-1.-finding-most-similar-quora-duplicate">Application 1. Finding most similar Quora duplicate</a></li>
+  <li><a href="#distance-between-embeddings" id="toc-distance-between-embeddings" class="nav-link" data-scroll-target="#distance-between-embeddings">Distance between embeddings</a>
+  <ul>
+  <li><a href="#cosine-similarity" id="toc-cosine-similarity" class="nav-link" data-scroll-target="#cosine-similarity">Cosine similarity</a></li>
+  <li><a href="#dot-product" id="toc-dot-product" class="nav-link" data-scroll-target="#dot-product">Dot product</a></li>
+  <li><a href="#euclidean-distance" id="toc-euclidean-distance" class="nav-link" data-scroll-target="#euclidean-distance">Euclidean Distance</a></li>
+  <li><a href="#picking-a-score-function" id="toc-picking-a-score-function" class="nav-link" data-scroll-target="#picking-a-score-function">Picking a score function</a></li>
+  </ul></li>
+  <li><a href="#scaling-up" id="toc-scaling-up" class="nav-link" data-scroll-target="#scaling-up">Scaling Up</a>
+  <ul>
+  <li><a href="#application-2.-paraphrase-mining" id="toc-application-2.-paraphrase-mining" class="nav-link" data-scroll-target="#application-2.-paraphrase-mining">Application 2. Paraphrase Mining</a></li>
+  </ul></li>
+  <li><a href="#selecting-and-evaluating-models" id="toc-selecting-and-evaluating-models" class="nav-link" data-scroll-target="#selecting-and-evaluating-models">Selecting and evaluating models</a></li>
+  <li><a href="#showcase-application-real-time-embeddings-in-your-browser" id="toc-showcase-application-real-time-embeddings-in-your-browser" class="nav-link" data-scroll-target="#showcase-application-real-time-embeddings-in-your-browser">Showcase Application: Real-time Embeddings in your browser</a></li>
+  <li><a href="#the-state-of-the-ecosystem" id="toc-the-state-of-the-ecosystem" class="nav-link" data-scroll-target="#the-state-of-the-ecosystem">The State of the Ecosystem</a>
+  <ul>
+  <li><a href="#building-on-top-of-embeddings" id="toc-building-on-top-of-embeddings" class="nav-link" data-scroll-target="#building-on-top-of-embeddings">Building on top of embeddings:</a></li>
+  <li><a href="#embedding-databases" id="toc-embedding-databases" class="nav-link" data-scroll-target="#embedding-databases">Embedding databases</a></li>
+  <li><a href="#research" id="toc-research" class="nav-link" data-scroll-target="#research">Research</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#knowledge-check" id="toc-knowledge-check" class="nav-link" data-scroll-target="#knowledge-check">Knowledge Check</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Sentence Embeddings. Introduction to Sentence Embeddings</h1>
+</div>
+
+<div>
+  <div class="description">
+    Everything you wanted to know about sentence embeddings (and maybe a bit more)
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 7, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p><a href="https://colab.research.google.com/github/osanseviero/hackerllama/blob/main/nbs/blog/posts/sentence_embeddings/index.ipynb" rel="nofollow" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
+<p>This series aims to demystify embeddings and show you how to use them in your projects. This first blog post will teach you how to use and scale up open-source embedding models. We’ll look into the criteria for picking an existing model, current evaluation methods, and the state of the ecosystem. We’ll look into three exciting applications:</p>
+<ul>
+<li>Finding the most similar Quora or StackOverflow questions</li>
+<li>Given a huge dataset, find the most similar items</li>
+<li>Running search embedding models directly in the users’ browser (no server required)</li>
+</ul>
+<p>You can either read the content here or execute it in Google Colab by clicking the badge at the top of the page. Let’s dive into embeddings!</p>
+<section id="the-tldr" class="level2">
+<h2 class="anchored" data-anchor-id="the-tldr">The TL;DR</h2>
+<p>You keep reading about “embeddings this” and “embeddings that”, but you might still not know exactly what they are. You are not alone! Even if you have a vague idea of what embeddings are, you might use them through a black-box API without really understanding what’s going on under the hood. This is a problem because the current state of open-source embedding models is very strong - they are pretty easy to deploy, small (and hence cheap to host), and outperform many closed-source models.</p>
+<p>An embedding represents information as a vector of numbers (think of it as a list!). For example, we can obtain the embedding of a word, a sentence, a document, an image, an audio file, etc. Given the sentence “Today is a sunny day”, we can obtain its embedding, which would be a vector of a specific size, such as 384 numbers (such vector could look like [0.32, 0.42, 0.15, …, 0.72]). What is interesting is that the <strong>embeddings capture the semantic meaning of the information</strong>. For example, embedding the sentence “Today is a sunny day” will be very similar to that of the sentence “The weather is nice today”. Even if the words are different, the meaning is similar, and the embeddings will reflect that.</p>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>If you’re not sure what words such as “vector”, “semantic similarity”, the vector size, or “pretrained” mean, don’t worry! We’ll explain them in the following sections. Focus on the high-level understanding first.</p>
+</div>
+</div>
+</div>
+<p>So, this vector captures the semantic meaning of the information, making it easier to compare to each other. For example, we can use embeddings to find similar questions in Quora or StackOverflow, search code, find similar images, etc. Let’s look into some code!</p>
+<p>We’ll use Sentence Transformers, an open-source library that makes it easy to use pre-trained embedding models. In particular, ST allows us to turn sentences into embeddings quickly. Let’s run an example and then discuss how it works under the hood.</p>
+<p>Let’s begin by installing the library:</p>
+<div id="47bd2412" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install sentence_transformers</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The second step is to load an existing model. We’ll start using <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a>. It’s not the best open-source embedding model, but it’s quite popular and very small (23 million parameters), which means we can get started with it very quickly.</p>
+<div id="822aee06" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">"sentence-transformers/all-MiniLM-L6-v2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now that we loaded a model, let’s use it to encode some sentences. We can use the <code>encode</code> method to obtain the embeddings of a list of sentences. Let’s try it out!</p>
+<div id="51e050ec" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> util</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>sentences <span class="op">=</span> [<span class="st">"The weather today is beautiful"</span>, <span class="st">"It's raining!"</span>, <span class="st">"Dogs are awesome"</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(sentences)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>embeddings.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>(3, 384)</code></pre>
+</div>
+</div>
+<p>all-MiniLM-L6-v2 creates embeddings of 384 values. We obtain three embeddings, one for each sentence. Think of <code>embeddings</code> as a “database” of embeddings. Given a new sentence, how can we find the most similar sentence? We can use the <code>util.pytorch_cos_sim</code> method to compute the cosine similarity (we’ll talk more about it soon) between the new sentence embedding and all the embeddings in the database. The cosine similarity is a number between 0 and 1 that indicates how similar two embeddings are. A value of 1 means that the embeddings are identical, while 0 means that the embeddings are entirely different. Let’s try it out!</p>
+<div id="ee557a54" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>first_embedding <span class="op">=</span> model.encode(<span class="st">"Today is a sunny day"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> embedding, sentence <span class="kw">in</span> <span class="bu">zip</span>(embeddings, sentences):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    similarity <span class="op">=</span> util.pytorch_cos_sim(first_embedding, embedding)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(similarity, sentence)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[0.7344]]) The weather today is beautiful
+tensor([[0.4180]]) It's raining!
+tensor([[0.1060]]) Dogs are awesome</code></pre>
+</div>
+</div>
+<p>What can we interpret of this? Although “today is a sunny day” and “the weather today is beautiful” don’t have the same words, the embeddings can capture some semantic meaning, so the cosine similarity is relatively high. On the other hand, “Dogs are awesome”, although true, has nothing to do with the weather or today; hence, the cosine similarity is very low.</p>
+<p>To expand on this idea of similar embeddings, let’s look into how they could be used in a product. Imagine that U.S. Social Security would like to allow users to write Medicare-related questions in an input field. This topic is very sensitive, and we likely don’t want a model to hallucinate with something unrelated! Instead, we can leverage a database of questions (in this case, there’s an existing Medicare FAQ). The process is similar to the above”</p>
+<ol type="1">
+<li>We have a corpus (collection) of questions and answers.</li>
+<li>We compute the embeddings of all the questions.</li>
+<li>Given a new question, we compute its embedding.</li>
+<li>We compute the cosine similarity between the new question embedding and all the embeddings in the database.</li>
+<li>We return the most similar question (which is associated with the most similar embedding).</li>
+</ol>
+<p>Steps 1 and 2 can be done offline (that is, we compute the embeddings only once and store them). The rest of the steps can be done at search time (each time a user asks a question). Let’s see what this would look like in code.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://huggingface.co/spaces/sentence-transformers/embeddings-semantic-search"><img src="embedding.png" class="img-fluid figure-img"></a></p>
+<figcaption>Representation of embeddings in two dimensions</figcaption>
+</figure>
+</div>
+<p>Let’s first create our map of frequently asked questions.</p>
+<div id="93ff43ec" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data from https://faq.ssa.gov/en-US/topic/?id=CAT-01092</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>faq <span class="op">=</span> {</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"How do I get a replacement Medicare card?"</span>: <span class="st">"If your Medicare card was lost, stolen, or destroyed, you can request a replacement online at Medicare.gov."</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"How do I sign up for Medicare?"</span>: <span class="st">"If you already get Social Security benefits, you do not need to sign up for Medicare. We will automatically enroll you in Original Medicare (Part A and Part B) when you become eligible. We will mail you the information a few months before you become eligible."</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"What are Medicare late enrollment penalties?"</span>: <span class="st">"In most cases, if you don’t sign up for Medicare when you’re first eligible, you may have to pay a higher monthly premium. Find more information at https://faq.ssa.gov/en-us/Topic/article/KA-02995"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Will my Medicare premiums be higher because of my higher income?"</span>: <span class="st">"Some people with higher income may pay a larger percentage of their monthly Medicare Part B and prescription drug costs based on their income. We call the additional amount the income-related monthly adjustment amount."</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"What is Medicare and who can get it?"</span>: <span class="st">"Medicare is a health insurance program for people age 65 or older. Some younger people are eligible for Medicare including people with disabilities, permanent kidney failure and amyotrophic lateral sclerosis (Lou Gehrig’s disease or ALS). Medicare helps with the cost of health care, but it does not cover all medical expenses or the cost of most long-term care."</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Once again, we use the <code>encode</code> method to obtain the embeddings of all the questions.</p>
+<div id="21a6455c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>corpus_embeddings <span class="op">=</span> model.encode(<span class="bu">list</span>(faq.keys()))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(corpus_embeddings.shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(5, 384)</code></pre>
+</div>
+</div>
+<p>Once a user asks a question, we obtain its embedding. We usually refer to this embedding as the query embedding.</p>
+<div id="aff8ba08" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>user_question <span class="op">=</span> <span class="st">"Do I need to pay more after a raise?"</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> model.encode(user_question)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>query_embedding.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>(384,)</code></pre>
+</div>
+</div>
+<p>We can now compute the similarity between the corpus embeddings and the query embedding. We could have a loop and use <code>util.pytorch.cos_sim</code> as we did before, but Sentence Transformers provides an even friendlier method called <code>semantic_search</code> that does all the work for us. It returns the top-k most similar embeddings and their similarity score. Let’s try it out!</p>
+<div id="c099a300" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>similarities <span class="op">=</span> util.semantic_search(query_embedding, corpus_embeddings, top_k<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>similarities</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>[[{'corpus_id': 3, 'score': 0.35796287655830383},
+  {'corpus_id': 2, 'score': 0.2787758708000183},
+  {'corpus_id': 1, 'score': 0.15840476751327515}]]</code></pre>
+</div>
+</div>
+<p>Let’s now look at which questions and answers this corresponds to:</p>
+<div id="c107948c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, result <span class="kw">in</span> <span class="bu">enumerate</span>(similarities[<span class="dv">0</span>]):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    corpus_id <span class="op">=</span> result[<span class="st">"corpus_id"</span>]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> result[<span class="st">"score"</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Top </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss"> question (p=</span><span class="sc">{</span>score<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span><span class="bu">list</span>(faq.keys())[corpus_id]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Answer: </span><span class="sc">{</span><span class="bu">list</span>(faq.values())[corpus_id]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top 1 question (p=0.35796287655830383): Will my Medicare premiums be higher because of my higher income?
+Answer: Some people with higher income may pay a larger percentage of their monthly Medicare Part B and prescription drug costs based on their income. We call the additional amount the income-related monthly adjustment amount.
+Top 2 question (p=0.2787758708000183): What are Medicare late enrollment penalties?
+Answer: In most cases, if you don’t sign up for Medicare when you’re first eligible, you may have to pay a higher monthly premium. Find more information at https://faq.ssa.gov/en-us/Topic/article/KA-02995
+Top 3 question (p=0.15840476751327515): How do I sign up for Medicare?
+Answer: If you already get Social Security benefits, you do not need to sign up for Medicare. We will automatically enroll you in Original Medicare (Part A and Part B) when you become eligible. We will mail you the information a few months before you become eligible.</code></pre>
+</div>
+</div>
+<p>Great, so given the question “Do I need to pay more after a raise?”, we know that the most similar question is “Will my Medicare premiums be higher because of my higher income?” and hence we can return the provided answer. In practice, you would likely have thousands to millions of embeddings, but this was a simple yet powerful example of how embeddings can be used to find similar questions.</p>
+<p>Now that we better understand what embeddings are and how they can be used, let’s do a deeper dive into them!</p>
+</section>
+<section id="from-word-embeddings-to-sentence-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="from-word-embeddings-to-sentence-embeddings">From word embeddings to sentence embeddings</h2>
+<section id="word2vec-and-glove" class="level3">
+<h3 class="anchored" data-anchor-id="word2vec-and-glove">Word2Vec and GloVe</h3>
+<p>It’s time to take a step back and learn more about embeddings and why they are needed. Neural networks, such as BERT, are not able to process words directly; they need numbers. And the way to provide words is to represent them as vectors, also called word embeddings.</p>
+<p>In the traditional setup, you define a vocabulary (which words are allowed), and then each word in this vocabulary has an assigned embedding. Words not in the vocabulary are mapped to a special token, usually called <unk> (a standard placeholder for words not found during training). For example, let’s say we have a vocabulary of three words, and we assign each word a vector of size five. We could have the following embeddings:</unk></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Word</th>
+<th>Embedding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>king</td>
+<td>[0.15, 0.2, 0.2, 0.3, 0.5]</td>
+</tr>
+<tr class="even">
+<td>queen</td>
+<td>[0.12, 0.1, 0.19, 0.3, 0.47]</td>
+</tr>
+<tr class="odd">
+<td>potato</td>
+<td>[0.13, 0.4, 0.1, 0.15, 0.01]</td>
+</tr>
+<tr class="even">
+<td><code>&lt;UNK&gt;</code></td>
+<td>[0.01, 0.02, 0.01, 0.4, 0.11]</td>
+</tr>
+</tbody>
+</table>
+<p>The embedding I wrote above are numbers that I wrote somewhat randomly. In practice, <strong>the embeddings are learned</strong>. This is the main idea of methods such as <a href="https://en.wikipedia.org/wiki/Word2vec">Word2Vec</a> and <a href="https://nlp.stanford.edu/pubs/glove.pdf">GloVe</a>. They learn the embeddings of the words in a corpus in such a way that words that appear in similar contexts have similar embeddings. For example, the embeddings of “king” and “queen” are similar because they appear in similar contexts.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://huggingface.co/spaces/sentence-transformers/embeddings-semantic-search"><img src="embedding.png" class="img-fluid figure-img"></a></p>
+<figcaption>Word embeddings</figcaption>
+</figure>
+</div>
+<p>Some open-source libraries, such as Gensim and fastText, allow you to obtain pre-trained Word2Vec and GloVe embeddings quickly. In the good ol’ days of NLP (2013), people used these models to compute word embeddings, which were helpful as inputs to other models. For example, you can compute the word embeddings of each word in a sentence and then pass that as input to a sci-kit learn classifier to classify the sentiment of the sentence.</p>
+<p>Glove and Word2Vec have fixed representations. Once they are trained, each word is assigned a fixed vector representation, regardless of their context (so “bank” in “river bank” and “savings bank” would have the same embedding). <strong>Word2vec and GloVe will struggle with words that have multiple meanings.</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="word2vec_meme.jpeg" class="img-fluid figure-img"></p>
+<figcaption>The good ol’ days of NLP</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Understanding the details of word2vec and GloVe is unnecessary to understand the rest of the blog post and sentence embeddings, so I’ll skip them. I recommend reading this <a href="https://lena-voita.github.io/nlp_course/word_embeddings.html">chapter from the excellent interactive NLP course</a> if you’re interested.</p>
+<p>As a TL;DR</p>
+<ul>
+<li>Word2Vec is trained by passing a very large corpus and training a shallow neural network to predict the surrounding words. Later alternatives predict the center word given the surrounding words.</li>
+<li>GloVe is trained by looking at the co-occurrence matrix of words (how often words appear together within a certain distance) and then using that matrix to obtain the embeddings.</li>
+</ul>
+<p>Word2Vec and GloVe are trained with objectives that ensure that words appearing in similar contexts have similar embeddings.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="word-embeddings-with-transformers" class="level3">
+<h3 class="anchored" data-anchor-id="word-embeddings-with-transformers">Word Embeddings with Transformers</h3>
+<p>More recently, with the advent of transformers, we have new ways to compute embeddings. The embedding is also learned, but instead of training an embedding model and then another model for the specific task, transformers learn useful embeddings in the context of their task. For example, BERT, a popular transformer model, learns word embeddings in the context of masked language modeling (predicting which word to fill in the blank) and next sentence prediction (whether sentence B follows sentence A).</p>
+<p>Transformers are state-of-the-art in many NLP tasks and can capture contextual information that word2vec and GloVe cannot capture, thanks to a mechanism called attention. Attention allows the model to weigh other words’ importance and capture contextual information. For example, in the sentence “I went to the bank to deposit money”, the word “bank” is ambiguous. Is it a river bank or a savings bank? The model can use the word “deposit” to understand that it’s a savings bank. These are <strong>contextualized embeddings</strong> - their word embedding can differ based on their surrounding words.</p>
+<p>Ok…we talked a lot about word embeddings; time to run some code. Let’s use a pre-trained transformer model, <a href="https://huggingface.co/bert-base-uncased">bert-base-uncased</a>, and obtain some word embeddings. We’ll use the <code>transformers</code> library for this. Let’s begin by loading the model and its tokenizer</p>
+<div id="ee696c78" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModel, AutoTokenizer</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModel.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We haven’t talked about tokenization so far. Until now, we’ve assumed we split data into words. When using transformers, we divided text into tokens. For example, the word “banking” could be split into two tokens, “bank” and “ing”. The tokenizer is responsible for breaking the data into tokens, and the way it splits the data is model-specific and is a deterministic learning process, which means that the same word will always be split into the same tokens. Let’s see what this looks like in code:</p>
+<div id="ea42bd65" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"The king and the queen are happy."</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>tokenizer.tokenize(text, add_special_tokens<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>['[CLS]', 'the', 'king', 'and', 'the', 'queen', 'are', 'happy', '.', '[SEP]']</code></pre>
+</div>
+</div>
+<p>Alright, in this example, each word was a token! (this is not always the case, as we’ll soon see). But we also see two things that might be unexpected: <code>[CLS]</code> and <code>[SEP]</code>. These are special tokens added to the sentence’s beginning and end. These are used because BERT was trained with that format. One of BERT’s training objectives is next-sentence prediction, which means that it was trained to predict whether two sentences are consecutive. The <code>[CLS]</code> token represents the entire sentence, and the <code>[SEP]</code> token separates sentences. This will be interesting later when we talk about sentence embeddings.</p>
+<p>Let’s now obtain the embeddings of each token.</p>
+<div id="f0ba5cf4" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(text, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>output[<span class="st">"last_hidden_state"</span>].shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([1, 10, 768])</code></pre>
+</div>
+</div>
+<p>Great! BERT is giving us an embedding of 768 values for each token. Each of these tokens has semantic information - <strong>they capture the meaning of the word in the context of the sentence</strong>. Let’s see if the embedding corresponding to the word “king” in this context is similar to the one in “queen”.</p>
+<div id="311a561e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>king_embedding <span class="op">=</span> output[<span class="st">"last_hidden_state"</span>][<span class="dv">0</span>][<span class="dv">2</span>]  <span class="co"># 2 is the position of king</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>queen_embedding <span class="op">=</span> output[<span class="st">"last_hidden_state"</span>][<span class="dv">0</span>][<span class="dv">5</span>]  <span class="co"># 5 is the position of queen</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Shape of embedding </span><span class="sc">{</span>king_embedding<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Similarity between king and queen embedding </span><span class="sc">{</span>util<span class="sc">.</span>pytorch_cos_sim(king_embedding, queen_embedding)[<span class="dv">0</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Shape of embedding torch.Size([768])
+Similarity between king and queen embedding 0.7920711040496826</code></pre>
+</div>
+</div>
+<p>Ok, it seems they are quite similar in this context! Let’s now look at the word “happy”.</p>
+<div id="f95cbfca" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>happy_embedding <span class="op">=</span> output.last_hidden_state[<span class="dv">0</span>][<span class="dv">7</span>]  <span class="co"># happy</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>util.pytorch_cos_sim(king_embedding, happy_embedding)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.5239]], grad_fn=&lt;MmBackward0&gt;)</code></pre>
+</div>
+</div>
+<p>This makes sense; the queen embedding is more similar to the king than the happy embedding.</p>
+<p>Let’s now look at how the same word can have different values depending on the context:</p>
+<div id="13151595" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"The angry and unhappy king"</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(text, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>output[<span class="st">"last_hidden_state"</span>].shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([1, 7, 768])</code></pre>
+</div>
+</div>
+<div id="c22354ba" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tokenizer.tokenize(text, add_special_tokens<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>['[CLS]', 'the', 'angry', 'and', 'unhappy', 'king', '[SEP]']</code></pre>
+</div>
+</div>
+<div id="25940625" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>king_embedding_2 <span class="op">=</span> output[<span class="st">"last_hidden_state"</span>][<span class="dv">0</span>][<span class="dv">5</span>]</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>util.pytorch_cos_sim(king_embedding, king_embedding_2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.5740]], grad_fn=&lt;MmBackward0&gt;)</code></pre>
+</div>
+</div>
+<p>Wow! Although both embeddings seem to correspond to the “king” embedding, they are pretty different in the vector space. What is going on? Remember that these are contextual embeddings. The context of the first sentence is quite positive, while the second sentence is quite negative. Hence, the embeddings are different.</p>
+<p>Previously, we discussed how the tokenizer might split a word into multiple tokens. A valid question is how we would obtain the word embedding in such a case. Let’s look at an example with the long word “tokenization.”</p>
+<div id="f77c3394" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>tokenizer.tokenize(<span class="st">"tokenization"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>['token', '##ization']</code></pre>
+</div>
+</div>
+<p>The word “tokenization” was split into two tokens, but we care about the embedding of “tokenization”! What can we do? We can do a <strong>pooling strategy</strong> in which we obtain the embedding of each token and then average them to obtain the word embedding. Let’s try it out!</p>
+<p>As before, we get started by tokenizing the test and running the token IDs through the model.</p>
+<div id="db8675d0" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"this is about tokenization"</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(text, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Let’s look at the tokenization of the sentence:</p>
+<div id="6321f902" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>tokenizer.tokenize(text, add_special_tokens<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>['[CLS]', 'this', 'is', 'about', 'token', '##ization', '[SEP]']</code></pre>
+</div>
+</div>
+<p>So we want to pool the embeddings of the tokens 4 and 5 by averaging them. Let’s first obtain the embeddings of the tokens.</p>
+<div id="e13fd5e1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>word_token_indices <span class="op">=</span> [<span class="dv">4</span>, <span class="dv">5</span>]</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>word_embeddings <span class="op">=</span> output[<span class="st">"last_hidden_state"</span>][<span class="dv">0</span>, word_token_indices]</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>word_embeddings.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([2, 768])</code></pre>
+</div>
+</div>
+<p>And now let’s average them using <code>torch.mean</code>.</p>
+<div id="d179cd71" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>torch.mean(word_embeddings, dim<span class="op">=</span><span class="dv">0</span>).shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([768])</code></pre>
+</div>
+</div>
+<p>Let’s wrap all of it in a function so we can easily use it later.</p>
+<div id="5aef9630" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_word_embedding(text, word):</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Encode the text and do a forward pass through the model to get the hidden states</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    encoded_input <span class="op">=</span> tokenizer(text, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():  <span class="co"># We don't need gradients for embedding extraction</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find the indices for the word</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    word_ids <span class="op">=</span> tokenizer.encode(</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>        word, add_special_tokens<span class="op">=</span><span class="va">False</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    )  <span class="co"># No special tokens anymore</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    word_token_indices <span class="op">=</span> [</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>        i</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, token_id <span class="kw">in</span> <span class="bu">enumerate</span>(encoded_input[<span class="st">"input_ids"</span>][<span class="dv">0</span>])</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token_id <span class="kw">in</span> word_ids</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pool the embeddings for the word</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>    word_embeddings <span class="op">=</span> output[<span class="st">"last_hidden_state"</span>][<span class="dv">0</span>, word_token_indices]</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.mean(word_embeddings, dim<span class="op">=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Example 1.</strong> Similarity between king and queen embeddings in the context of both being angry.</p>
+<div id="eb120b8b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>util.pytorch_cos_sim(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The king is angry"</span>, <span class="st">"king"</span>),</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The queen is angry"</span>, <span class="st">"queen"</span>),</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.8564]])</code></pre>
+</div>
+</div>
+<p><strong>Example 2.</strong> Similarity between king and queen embeddings in the context of the king being happy and the queen angry. Notice how they are less similar than in the previous example.</p>
+<div id="d915e800" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>util.pytorch_cos_sim(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The king is happy"</span>, <span class="st">"king"</span>),</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The queen is angry"</span>, <span class="st">"queen"</span>),</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.8273]])</code></pre>
+</div>
+</div>
+<p><strong>Example 3</strong>. Similarity between king embeddings in two very different contexts. Even if they are the same word, the different context of the word makes the embeddings very different.</p>
+<div id="88fb50b7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This is same as before</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>util.pytorch_cos_sim(</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The king and the queen are happy."</span>, <span class="st">"king"</span>),</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The angry and unhappy king"</span>, <span class="st">"king"</span>),</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.5740]])</code></pre>
+</div>
+</div>
+<p><strong>Example 4.</strong> Similarity between a word that has two different meanings. The word “bank” is ambiguous, it can be a river bank or a savings bank. The embeddings are different depending on the context.</p>
+<div id="daf5635c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>util.pytorch_cos_sim(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The river bank"</span>, <span class="st">"bank"</span>),</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    get_word_embedding(<span class="st">"The savings bank"</span>, <span class="st">"bank"</span>),</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.7587]])</code></pre>
+</div>
+</div>
+<p>I hope this gave an idea about what word embeddings are. Now that we understand word embeddings let’s look into sentence embeddings!</p>
+</section>
+<section id="sentence-embeddings" class="level3">
+<h3 class="anchored" data-anchor-id="sentence-embeddings">Sentence Embeddings</h3>
+<p>Just as word embeddings are vector representations of words, sentence embeddings are vector representations of a sentence. We can also compute embeddings of paragraphs and documents! Let’s look into it.</p>
+<p>There are three approaches we can take: <code>[CLS]</code> pooling, max pooling and mean pooling.</p>
+<ul>
+<li>Mean pooling means averaging all the word embeddings of the sentence.</li>
+<li>Max pooling means taking the maximum value of each dimension of the word embeddings.</li>
+<li><code>[CLS]</code> pooling means using the embedding corresponding to the <code>[CLS]</code> token as the sentence embedding. Let’s look deeper into this last one, which is the least intuitive.</li>
+</ul>
+<section id="cls-pooling" class="level4">
+<h4 class="anchored" data-anchor-id="cls-pooling">[CLS] Pooling</h4>
+<p>As we saw before, BERT adds a special token <code>[CLS]</code> at the beginning of the sentence. This token is used to represent the entire sentence. For example, when someone wants to fine-tune a BERT model to perform text classification, a common approach is to add a linear layer on top of the <code>[CLS]</code> embedding. The idea is that the <code>[CLS]</code> token will capture the meaning of the entire sentence.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="classification.png" class="img-fluid figure-img"></p>
+<figcaption>The hidden state/embedding corresponding to the <code>CLS</code> token can be used to fine-tune a classification model.</figcaption>
+</figure>
+</div>
+<p>We can take the same approach and use the embedding of the [CLS] token as the sentence embedding. Let’s see how this works in code. We’ll use the same sentence as before.</p>
+<div id="41854372" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(<span class="st">"This is an example sentence"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>model_output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>sentence_embedding <span class="op">=</span> model_output[<span class="st">"last_hidden_state"</span>][:, <span class="dv">0</span>, :]</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>sentence_embedding.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([1, 768])</code></pre>
+</div>
+</div>
+<p>Great! We obtained the model output’s first embedding, corresponding to the [CLS] token. Let’s wrap this code into a function.</p>
+<div id="e4c53797" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cls_pooling(model_output):</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_output[<span class="st">"last_hidden_state"</span>][:, <span class="dv">0</span>, :]</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_sentence_embedding(text):</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    encoded_input <span class="op">=</span> tokenizer(text, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>        model_output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cls_pooling(model_output)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="0e8ec816" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> [get_sentence_embedding(sentence) <span class="cf">for</span> sentence <span class="kw">in</span> sentences]</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> get_sentence_embedding(<span class="st">"Today is a sunny day"</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> embedding, sentence <span class="kw">in</span> <span class="bu">zip</span>(embeddings, sentences):</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    similarity <span class="op">=</span> util.pytorch_cos_sim(query_embedding, embedding)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(similarity, sentence)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[0.9261]]) The weather today is beautiful
+tensor([[0.8903]]) It's raining!
+tensor([[0.9317]]) Dogs are awesome</code></pre>
+</div>
+</div>
+<p>Hmm…something looks off here 🤔 One would have expected this to work out of the box.</p>
+<p>Well, it turns out BERT has an additional trick. As mentioned before, when BERT was trained, the CLS token was used to predict whether two sentences were consecutive. To do so, BERT processes the [CLS]-corresponding embedding and passes it through a linear layer and a tanh activation function (see <a href="https://github.com/huggingface/transformers/blob/95754b47a6d4fbdad3440a45762531e8c471c528/src/transformers/models/bert/modeling_bert.py#L652C7-L665">code here</a>). The idea is that the linear layer and the tanh activation function will learn a better representation of the <code>[CLS]</code> token. This is the <code>pooler</code> component of the BERT model and is used to obtain the <code>model_output.pooler_output</code>.</p>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>This might sound confusing, so let’s repeat what’s happening here.</p>
+<ol type="1">
+<li>BERT outputs the embeddings of each token.</li>
+<li>The first embedding corresponds to the <code>[CLS]</code> token.</li>
+<li>The <code>[CLS]</code> token is processed through a linear layer and a tanh activation function to obtain the <code>pooler_output</code>.</li>
+</ol>
+<p>During training, the pooler_output is used to predict whether two sentences are consecutive (one of the pre-training tasks of BERT). This makes processing the [CLS] token more meaningful than the raw [CLS] embedding.</p>
+</div>
+</div>
+</div>
+<p>To show that there is no magic going on here, we can either pass the list of word embeddings to <code>model.pooler</code> or simply get the <code>pooler_output</code> from the model output. Let’s try it out!</p>
+<div id="142e73c2" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>model.pooler(model_output[<span class="st">"last_hidden_state"</span>])[<span class="dv">0</span>][:<span class="dv">10</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([-0.9302, -0.4884, -0.4387,  0.8024,  0.3668, -0.3349,  0.9438,  0.3593,
+        -0.3216, -1.0000], grad_fn=&lt;SliceBackward0&gt;)</code></pre>
+</div>
+</div>
+<div id="a0309609" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>model_output[<span class="st">"pooler_output"</span>][<span class="dv">0</span>][:<span class="dv">10</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([-0.9302, -0.4884, -0.4387,  0.8024,  0.3668, -0.3349,  0.9438,  0.3593,
+        -0.3216, -1.0000], grad_fn=&lt;SliceBackward0&gt;)</code></pre>
+</div>
+</div>
+<p>Yay! As you can see, the first ten elements of the embedding are identical! Let’s now re-compute the distances using this new embedding technique:</p>
+<div id="03e4d03d" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cls_pooling(model_output):</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model.pooler(model_output[<span class="st">"last_hidden_state"</span>])  <span class="co"># we changed this</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="co"># This stays the same</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> [get_sentence_embedding(sentence) <span class="cf">for</span> sentence <span class="kw">in</span> sentences]</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> get_sentence_embedding(<span class="st">"Today is a sunny day"</span>)</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> embedding, sentence <span class="kw">in</span> <span class="bu">zip</span>(embeddings, sentences):</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>    similarity <span class="op">=</span> util.pytorch_cos_sim(query_embedding, embedding)</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(similarity, sentence)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[0.9673]], grad_fn=&lt;MmBackward0&gt;) The weather today is beautiful
+tensor([[0.9029]], grad_fn=&lt;MmBackward0&gt;) It's raining!
+tensor([[0.8930]], grad_fn=&lt;MmBackward0&gt;) Dogs are awesome</code></pre>
+</div>
+</div>
+<p>Much, much better! We just obtained the closest sentences to “Today is a sunny day”.</p>
+</section>
+</section>
+</section>
+<section id="sentence-transformers" class="level2">
+<h2 class="anchored" data-anchor-id="sentence-transformers">Sentence Transformers</h2>
+<section id="using-the-transformers-library" class="level3">
+<h3 class="anchored" data-anchor-id="using-the-transformers-library">Using the transformers library</h3>
+<p>This yields some decent results, but in practice, this was not much better than using Word2Vec or GloVe word embeddings and averaging them. The reason is that the [CLS] token is not trained to be a good sentence embedding. It’s trained to be a good sentence embedding for next-sentence prediction!</p>
+<p>Introducing 🥁🥁🥁 Sentence Transformers! Sentence Sentence Transformers (also known as SBERT) have a special training technique focusing on yielding high-quality sentence embeddings. Just as in the TL;DR section of this blog post, let’s use the <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a> model. In the beginning, we used the <code>sentence-transformers</code> library, which is a high-level wrapper library around <code>transformers</code>. Let’s try to go the hard way first! The process is as follows:</p>
+<ol type="1">
+<li>We tokenize the input sentence.</li>
+<li>We process the tokens through the model.</li>
+<li>We calculate the mean of the token embeddings.</li>
+<li>We normalize the embeddings to ensure the embedding vector has a unit length.</li>
+</ol>
+<p>Just as before, we can load the model and the tokenizer, tokenize the sentence and pass it to the model</p>
+<div id="9e849c1f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(<span class="st">"sentence-transformers/all-MiniLM-L6-v2"</span>)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModel.from_pretrained(<span class="st">"sentence-transformers/all-MiniLM-L6-v2"</span>)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(<span class="st">"Today is a sunny day"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>model_output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>What we’ve done until now is very similar to what we did before, except that we are using a different model. The next step is to do pooling. While previously we did [CLS] pooling, sentence transformers usually use mean or max pooling. Let’s try it out!</p>
+<div id="bb460daa" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>token_embeddings <span class="op">=</span> model_output[<span class="st">"last_hidden_state"</span>]</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>token_embeddings.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([1, 7, 384])</code></pre>
+</div>
+</div>
+<p>Note how, with this model, each embedding is smaller (384 values rather than 768). We can now compute the mean of the embeddings to obtain the sentence embedding.</p>
+<div id="d10efd64" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>mean_embedding <span class="op">=</span> torch.mean(token_embeddings, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>mean_embedding.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([1, 384])</code></pre>
+</div>
+</div>
+<p>The last step is to perform normalization. Normalization ensures that the embedding vector has a unit length, which means its length (or magnitude) is 1.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What is normalization?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What is normalization?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>To understand why we do normalization, revisiting some vector math is helpful. For a vector v with components (v1, v2, …, vn), it’s length is defined as</p>
+<p><span class="math display">\[
+\| \mathbf{v} \| = \sqrt{v_1^2 + v_2^2 + \ldots + v_n^2}
+\]</span></p>
+<p>When normalizing a vector, we scale the values so that the vector length is 1. This is done by dividing each vector element by the vector’s magnitude.</p>
+<p><span class="math display">\[
+\mathbf{u} = \frac{\mathbf{v}}{\| \mathbf{v} \|}
+\]</span></p>
+</div>
+</div>
+<p>This is particularly helpful when we want to compare vectors. For example, if we want to compute the cosine similarity between two vectors, we usually compare their direction rather than their magnitude. Normalizing the vectors ensures that each vector contributes equally to the similarity. We’ll talk more about embedding comparisons soon! Let’s try it out!</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Actually, we are using cosine similarity to compute the similarity between embeddings. As we’ll see later in the blog post, the magnitude of the embeddings is not relevant when computing the cosine similarity, but it’s still a good think to normalize them in case we want to experiment with other ways to measure distances.</p>
+</div>
+</div>
+<div id="a79d304a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>normalized_embedding <span class="op">=</span> F.normalize(mean_embedding)</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>normalized_embedding.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([1, 384])</code></pre>
+</div>
+</div>
+<p>Let’s wrap this in a function!</p>
+<div id="4c1ffd4c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mean_pooling(model_output):</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.mean(model_output[<span class="st">"last_hidden_state"</span>], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_sentence_embedding(text):</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>    encoded_input <span class="op">=</span> tokenizer(text, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a>        model_output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>    sentence_embeddings <span class="op">=</span> mean_pooling(model_output)</span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> F.normalize(sentence_embeddings)</span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>get_sentence_embedding(<span class="st">"Today is a sunny day"</span>)[<span class="dv">0</span>][:<span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([-0.0926,  0.5913,  0.5535,  0.4214,  0.2129])</code></pre>
+</div>
+</div>
+<p>In practice, you’ll likely be encoding batches of sentences, so we need to make some changes</p>
+<ul>
+<li>Modify the tokenization so we apply <code>truncation</code> (cutting the sentence if it’s longer than the maximum length) and <code>padding</code> (adding <code>[PAD]</code> tokens to the end of the sentence).</li>
+<li>Modify the pooling so we take the attention mask into account. The attention mask is a vector of 0s and 1s that indicates which tokens are real and which are padding. We want to ignore the padding tokens when computing the mean!</li>
+</ul>
+<div id="4c7abec0" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mean_pooling(model_output, attention_mask):</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>    token_embeddings <span class="op">=</span> model_output[<span class="st">"last_hidden_state"</span>]</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>    input_mask_expanded <span class="op">=</span> (</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>        attention_mask.unsqueeze(<span class="op">-</span><span class="dv">1</span>).expand(token_embeddings.size()).<span class="bu">float</span>()</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.<span class="bu">sum</span>(token_embeddings, <span class="dv">1</span>) <span class="op">/</span> torch.clamp(</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>        input_mask_expanded.<span class="bu">sum</span>(<span class="dv">1</span>), <span class="bu">min</span><span class="op">=</span><span class="fl">1e-9</span></span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a><span class="co"># This now receives a list of sentences</span></span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_sentence_embedding(sentences):</span>
+<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>    encoded_input <span class="op">=</span> tokenizer(</span>
+<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>        sentences, padding<span class="op">=</span><span class="va">True</span>, truncation<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span></span>
+<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a>        model_output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>    sentence_embeddings <span class="op">=</span> mean_pooling(model_output, encoded_input[<span class="st">"attention_mask"</span>])</span>
+<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> F.normalize(sentence_embeddings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="fe620161" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> get_sentence_embedding(<span class="st">"Today is a sunny day"</span>)[<span class="dv">0</span>]</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>query_embedding[:<span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([-0.0163,  0.1041,  0.0974,  0.0742,  0.0375])</code></pre>
+</div>
+</div>
+<p>We got the same result, great! Let’s now repeat our search example from before.</p>
+<div id="690905ce" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> [get_sentence_embedding(sentence) <span class="cf">for</span> sentence <span class="kw">in</span> sentences]</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> embedding, sentence <span class="kw">in</span> <span class="bu">zip</span>(embeddings, sentences):</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>    similarity <span class="op">=</span> util.pytorch_cos_sim(query_embedding, embedding)</span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(similarity, sentence)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[0.7344]]) The weather today is beautiful
+tensor([[0.4180]]) It's raining!
+tensor([[0.1060]]) Dogs are awesome</code></pre>
+</div>
+</div>
+<p>Nice! Compared to the vanilla BERT [CLS]-pooled embeddings, the sentence transformer embeddings are more meaningful and have a larger difference between the unrelated vectors!</p>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>When to use each pooling strategy? It depends on the task.</p>
+<ul>
+<li><code>[CLS]</code> pooling is usually used when the transformer model has been fine-tuned on a specific downstream task that makes the <code>[CLS]</code> token very useful.</li>
+<li>Mean pooling is usually more effective on models that have not been fine-tuned on a downstream task. It ensures that all parts of the sentence are represented equally in the embedding and can work for long sentences where the influence of all tokens should be captured.</li>
+<li>Max pooling can be useful to capture the most important features in a sentence. This can be very useful if particular keywords are very informative, but it might miss the subtler context.</li>
+</ul>
+<p>In practice, a pooling method will be stored with the model, and you won’t have to worry about it. If there’s no method specified, mean pooling is usually a good default.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="using-the-sentence-transformers-library" class="level3">
+<h3 class="anchored" data-anchor-id="using-the-sentence-transformers-library">Using the sentence-transformers library</h3>
+<p>This was relatively easy, but the <code>sentence-transformers</code> library makes it even easier for us to do all of this! Here is the same code as in the TL;DR section.</p>
+<div id="21e13451" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a><span class="co"># We load the model</span></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">"sentence-transformers/all-MiniLM-L6-v2"</span>)</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> model.encode(<span class="st">"Today is a sunny day"</span>)</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(sentences)</span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> embedding, sentence <span class="kw">in</span> <span class="bu">zip</span>(embeddings, sentences):</span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>    similarity <span class="op">=</span> util.pytorch_cos_sim(query_embedding, embedding)</span>
+<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(similarity, sentence)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[0.7344]]) The weather today is beautiful
+tensor([[0.4180]]) It's raining!
+tensor([[0.1060]]) Dogs are awesome</code></pre>
+</div>
+</div>
+<p>This is quite powerful! If you had to implement a feature to identify duplicate questions without using ML, you would likely have to implement a lexical search system (which looks at exact matches of the input question), a fuzzy search system (which looks at approximate matches of the input question), or a statistical search system (which looks at the frequency of words in the input question).</p>
+<p>With embeddings, we can easily find similar questions without implementing any of these systems and having excellent results!</p>
+<p>The following image is a good example of how embeddings can be used to find code that would answer a user’s question.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="search.png" class="img-fluid figure-img"></p>
+<figcaption>Image of code search</figcaption>
+</figure>
+</div>
+</section>
+<section id="embedding-dimensions" class="level3">
+<h3 class="anchored" data-anchor-id="embedding-dimensions">Embedding dimensions</h3>
+<p>As you saw before, the model we used, all-MiniLM-L6-v2, generates sentence embeddings of 384 values. This is a hyperparameter of the model and can be changed. The larger the embedding size, the more information the embedding can capture. However, larger embeddings are more expensive to compute and store.</p>
+<p>The embeddings of popular open-source models go from 384 to 1024. The best current model, as of the time of writing, has embedding dimensions of 4096 values, but the model is much larger (7 billion parameters) compared to other models. In the closed-sourced world, Cohere has APIs that go from 384 to 4096 dimensions, OpenAI has embeddings of 1536, and so on. <strong>Embedding dimension is a trade-off</strong>. If you use very large embeddings, you will potentially get better results, but you will also have to pay more for hosting and inference. If you use vector databases, you will also have to pay more for storage.</p>
+</section>
+<section id="sequence-length" class="level3">
+<h3 class="anchored" data-anchor-id="sequence-length">Sequence length</h3>
+<p>One of the limitations of transformer models is that they have a maximum sequence length. This means that they can only process a certain number of tokens. For example, BERT has a maximum context length of 512 tokens. This means that if you want to encode a sentence with more than 512 tokens, you will have to find ways to work around this limitation. For example, you could split the sentence into multiple sentences of 512 tokens and then average the embeddings. This is not ideal because the model will not be able to capture the context of the entire sentence.</p>
+<p>This is not a problem for most use cases, but it can be a problem for long documents. For example, if you want to encode a 1000-word document, you will have to split it into multiple sentences of 512 tokens. This is not ideal because the model will not be able to capture the context of the entire document. Another approach can be to first generate a summary of the text and then encode the summary. This is a good approach if you want to encode long documents, but will require a good summarization model that might be too slow. Alternatively, you might know if a specific part of the document is good (such as abstracts, introductions, conclusions, etc.) and only encode that part if that’s the most meaningful part for your task.</p>
+</section>
+</section>
+<section id="application-1.-finding-most-similar-quora-duplicate" class="level2">
+<h2 class="anchored" data-anchor-id="application-1.-finding-most-similar-quora-duplicate">Application 1. Finding most similar Quora duplicate</h2>
+<p>We’re going to use the open-source <a href="https://huggingface.co/datasets/quora">Quora dataset</a>, which contains 400,000 pairs of questions from Quora. We will not train a model (yet!) and rather just use the embeddings to find similar questions given a new question. Let’s get started!</p>
+<p>Our first step will be to load the data - to do this, we’ll use the <code>datasets</code> library.</p>
+<div id="2bfdbf70" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install datasets</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="422811e5" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"quora"</span>)[<span class="st">"train"</span>]</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>dataset</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>Dataset({
+    features: ['questions', 'is_duplicate'],
+    num_rows: 404290
+})</code></pre>
+</div>
+</div>
+<p>To take a quick look at the data within the <code>Dataset</code> object, we can convert it to a Pandas <code>DataFrame</code> and look at the first rows.</p>
+<div id="b78d9700" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>dataset.to_pandas().head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">questions</th>
+<th data-quarto-table-cell-role="th">is_duplicate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>{'id': [1, 2], 'text': ['What is the step by s...</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>{'id': [3, 4], 'text': ['What is the story of ...</td>
+<td>False</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>{'id': [5, 6], 'text': ['How can I increase th...</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>{'id': [7, 8], 'text': ['Why am I mentally ver...</td>
+<td>False</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>{'id': [9, 10], 'text': ['Which one dissolve i...</td>
+<td>False</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Ok, so each sample is a dictionary. We do not care about the <code>is_duplicate</code> column here. Our goal is to find if any question in this dataset is similar to a new question. Let’s process the dataset so we only have a list of questions.</p>
+<div id="8cbb0afe" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>corpus_questions <span class="op">=</span> []</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d <span class="kw">in</span> dataset:</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>    corpus_questions.append(d[<span class="st">"questions"</span>][<span class="st">"text"</span>][<span class="dv">0</span>])</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>    corpus_questions.append(d[<span class="st">"questions"</span>][<span class="st">"text"</span>][<span class="dv">1</span>])</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>corpus_questions <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(corpus_questions))  <span class="co"># Remove duplicates</span></span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(corpus_questions)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>537362</code></pre>
+</div>
+</div>
+<p>The next step is to embed all the questions. We’ll use the <code>sentence-transformers</code> library for this. We’ll use the <a href="https://huggingface.co/sentence-transformers/quora-distilbert-multilingual"><code>quora-distilbert-multilingual</code> model</a>, which is a model trained for 100 languages and is trained specifically for Quora-style questions. This is a larger model, and hence will be slightly slower. It will also generate larger embeddings of 768 values.</p>
+<p>To get some quick results without having to wait five minutes for the model to process all the questions, we’ll only process the first 100000 questions. In practice, you would process all the questions or shuffle the questions and process a random subset of them when experimenting.</p>
+<div id="4ed7f45e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb82"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">"quora-distilbert-multilingual"</span>)</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>questions_to_embed <span class="op">=</span> <span class="dv">100000</span></span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>corpus_embeddings <span class="op">=</span> model.encode(</span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>    corpus_questions[:questions_to_embed],</span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>    show_progress_bar<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a>    convert_to_tensor<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"30cc6aa1ede9402ea9cd36fb9aed9376","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="bdb3c885" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>corpus_embeddings.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>torch.Size([100000, 768])</code></pre>
+</div>
+</div>
+<p>We just obtained 100,000 embddings in 20 seconds, even when this Sentence Transformer model is not tiny and I’m running this on my GPU-Poor computer. Unlike generative models, which are autoregressive and usually much slower, BERT-based models are super fast!</p>
+<p>Let’s now write a function that searches the corpus for the most similar question.</p>
+<div id="749b3c2e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> search(query):</span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>    start_time <span class="op">=</span> time.time()</span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a>    query_embedding <span class="op">=</span> model.encode(query, convert_to_tensor<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> util.semantic_search(query_embedding, corpus_embeddings)</span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>    end_time <span class="op">=</span> time.time()</span>
+<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Results (after </span><span class="sc">{:.3f}</span><span class="st"> seconds):"</span>.<span class="bu">format</span>(end_time <span class="op">-</span> start_time))</span>
+<span id="cb85-11"><a href="#cb85-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We look at top 5 results</span></span>
+<span id="cb85-12"><a href="#cb85-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> result <span class="kw">in</span> results[<span class="dv">0</span>][:<span class="dv">5</span>]:</span>
+<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(</span>
+<span id="cb85-14"><a href="#cb85-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"</span><span class="sc">{:.3f}</span><span class="ch">\t</span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(result[<span class="st">"score"</span>], corpus_questions[result[<span class="st">"corpus_id"</span>]])</span>
+<span id="cb85-15"><a href="#cb85-15" aria-hidden="true" tabindex="-1"></a>        )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="6eb8fb77" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>search(<span class="st">"How can I learn Python online?"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results (after 0.612 seconds):
+0.982   What is the best online resource to learn Python?
+0.980   Where I should learn Python?
+0.980   What's the best way to learn Python?
+0.980   How do I learn Python in easy way?
+0.979   How do I learn Python systematically?</code></pre>
+</div>
+</div>
+<p>Let’s try in Spanish!</p>
+<div id="d9ca38cb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb88"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>search(<span class="st">"Como puedo aprender Python online?"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results (after 0.016 seconds):
+0.980   What are the best websites to learn Python?
+0.980   How can I start learning the developing of websites using Python?
+0.979   How do I learn Python in easy way?
+0.976   How can I learn Python faster and effectively?
+0.976   How can I learn advanced Python?</code></pre>
+</div>
+</div>
+<p>It seems to be working quite well! Note that although our model can process queries in other languages, such as Spanish in the example above, the embeddings were generated for English questions. This means that the model will not be able to find similar questions in other languages.</p>
+</section>
+<section id="distance-between-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="distance-between-embeddings">Distance between embeddings</h2>
+<section id="cosine-similarity" class="level3">
+<h3 class="anchored" data-anchor-id="cosine-similarity">Cosine similarity</h3>
+<p>Until now we’ve been computing the cosine similarity between embeddings. This is a number between 0 and 1 that indicates how similar two embeddings are. A value of 1 means that the embeddings are identical, while 0 means that the embeddings are entirely different. So far we’ve used it as a black-box, so let’s look into it a bit more.</p>
+<p>The cosine similarity allows us to compare how similar two vectors are regardless of their magnitude. For example, if we have two vectors, [1, 2, 3] and [2, 4, 6], they are very similar in terms of direction, but their magnitude is different. The cosine similarity will be close to 1, indicating that they are very similar.</p>
+<div id="d01074f9" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb90"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> torch.FloatTensor([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> torch.FloatTensor([<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>])</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>util.cos_sim(a, b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[0.9926]])</code></pre>
+</div>
+</div>
+<p>Let’s plot both vectors. As you can see, they are very similar in terms of direction, but their magnitude is different.</p>
+<div id="9cb2f58a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>a</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([1., 2., 3.])</code></pre>
+</div>
+</div>
+<div id="eec404a4" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb94"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>V <span class="op">=</span> np.array([a.tolist(), b.tolist()])</span>
+<span id="cb94-5"><a href="#cb94-5" aria-hidden="true" tabindex="-1"></a>origin <span class="op">=</span> np.array([[<span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">0</span>]])  <span class="co"># origin point</span></span>
+<span id="cb94-6"><a href="#cb94-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb94-7"><a href="#cb94-7" aria-hidden="true" tabindex="-1"></a>plt.quiver(<span class="op">*</span>origin, V[:, <span class="dv">0</span>], V[:, <span class="dv">1</span>], color<span class="op">=</span>[<span class="st">"r"</span>, <span class="st">"b"</span>, <span class="st">"g"</span>], scale<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb94-8"><a href="#cb94-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-55-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s dive into its math. Cosine similarity is defined as the dot product of the vectors divided by the product of their magnitudes:</p>
+<p><span class="math display">\[
+\text{cosine similarity}(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|}
+\]</span></p>
+<p>We already discussed magnitudes at the beginning of the blog post. We need to compute the square root of the sum of the squares of a vector component</p>
+<p><span class="math display">\[
+\|\mathbf{A}\| = \sqrt{1^2 + 2^2 + 3^2} = \sqrt{14}
+\]</span></p>
+<p><span class="math display">\[
+\|\mathbf{B}\| = \sqrt{2^2 + 3^2 + 4^2} = \sqrt{29}
+\]</span></p>
+<p>We also need to compute the dot product of the vectors. The dot product is defined as the sum of the products of the corresponding vector components</p>
+<p><span class="math display">\[
+\mathbf{A} \cdot \mathbf{B} = \sum_{i=1}^{n} A_i B_i
+\]</span></p>
+<p>In this case, the dot product for A and B would look as follows</p>
+<p><span class="math display">\[
+\mathbf{A} \cdot \mathbf{B} = 1 \times 2 + 2 \times 3 + 3 \times 4 = 2 + 6 + 12 = 20
+\]</span></p>
+<p>Finally, we can compute the cosine similarity by doing</p>
+<p><span class="math display">\[
+\text{cosine similarity}(\mathbf{A}, \mathbf{B}) = \frac{20}{\sqrt{14} \sqrt{29}} = 0.992583
+\]</span></p>
+<p>which matches our result above.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Can you think of two vectors with cosine similarity of 1? Think of vectors with same direction but different magnitude.</p>
+</div>
+</div>
+</section>
+<section id="dot-product" class="level3">
+<h3 class="anchored" data-anchor-id="dot-product">Dot product</h3>
+<p>Cosine similarity does not take magnitude into account, but there might be use cases where the magnitude is meaningful. In those cases, <strong>dot product</strong> is a better metric. This means that longer or more verbose sentences with similar content could have a higher similarity score than shorter sentences with similar content due to their magnitude.</p>
+<p>The dot product is defined as the sum of the products of the corresponding vector components (it’s what we did before!)</p>
+<p><span class="math display">\[
+\mathbf{A} \cdot \mathbf{B} = \sum_{i=1}^{n} A_i B_i
+\]</span></p>
+<p>If you look at the cosine similarity formula, if you assume the vectors are normalized (that is, their magnitude is 1), the cosine similarity is equivalent to the dot product. This means that the cosine similarity is a normalized dot product.</p>
+<p>Let’s create a new vector, [4, 6, 8]. This vector has the same direction as [2, 3, 4], but it’s twice as long. Let’s compute the dot product of [1, 2, 3] with [2, 3, 4] and [4, 6, 8].</p>
+<div id="ce57221c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb95"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> torch.FloatTensor([<span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>])</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cosine Similarity between a and b: </span><span class="sc">{</span>util<span class="sc">.</span>cos_sim(a, b)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cosine Similarity between a and c: </span><span class="sc">{</span>util<span class="sc">.</span>cos_sim(a, c)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Dot product between a and b: </span><span class="sc">{</span>torch<span class="sc">.</span>dot(a, b)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Dot product between a and c: </span><span class="sc">{</span>torch<span class="sc">.</span>dot(a, c)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cosine Similarity between a and b: tensor([[0.9926]])
+Cosine Similarity between a and c: tensor([[0.9926]])
+Dot product between a and b: 20.0
+Dot product between a and c: 40.0</code></pre>
+</div>
+</div>
+<p>This makes sense! As b and c have the same angle, the cosine similarity is the same between a and b and a and c.&nbsp;However, the dot product is higher for a and c because c is longer than b.</p>
+<div id="c0305545" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb97"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>V <span class="op">=</span> np.array([a.tolist(), b.tolist(), c.tolist()])</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>origin <span class="op">=</span> np.array([[<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]])  <span class="co"># origin point</span></span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>plt.quiver(<span class="op">*</span>origin, V[:, <span class="dv">0</span>], V[:, <span class="dv">1</span>], color<span class="op">=</span>[<span class="st">"r"</span>, <span class="st">"b"</span>, <span class="st">"g"</span>], scale<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-57-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="euclidean-distance" class="level3">
+<h3 class="anchored" data-anchor-id="euclidean-distance">Euclidean Distance</h3>
+<p>The Euclidean Distance is the distance between two vectors by measuring a straight line between them. Just as the dot product, the Euclidean distance takes magnitude into account. I won’t dive too much into interpreting both metrics, but the main idea is that the Dot Product measures how much one vector extends into the direction of another vector, while the Euclidean Distance measures the straight-line distance between two vectors. It is defined as the square root of the sum of the squared differences between the vector components. It’s defined as</p>
+<p><span class="math display">\[
+\text{Euclidean Distance}(\mathbf{A}, \mathbf{B}) = \sqrt{\sum_{i=1}^{n} (A_i - B_i)^2}
+\]</span></p>
+<p>In practice, you can use the Squared Euclidean (L2-Squared)</p>
+<p><span class="math display">\[
+\text{Squared Euclidean}(\mathbf{A}, \mathbf{B}) = \sum_{i=1}^{n} (A_i - B_i)^2
+\]</span></p>
+</section>
+<section id="picking-a-score-function" class="level3">
+<h3 class="anchored" data-anchor-id="picking-a-score-function">Picking a score function</h3>
+<p>We just learned about dot-product, cosine similarity, and euclidean distance. When to use which?</p>
+<p>It depends on the model! Some models will be trained in a way that they produce normalized embeddings. In this case, dot-product, cosine similarity and euclidean distance will all produce the same results.</p>
+<p>Other models are not trained in a way that they produce normalized embeddings - they are tuned for dot-product. In this case, dot-product will be the best function to find the closest items in a vector space. Even then, if the magnitude is not important, we can normalize as we did in the previous sections. <strong>You can use different distance functions depending on your use case</strong>. Models with normalized embeddings will prefer shorter sentences, while models with non-normalized embeddings will prefer longer sentences. This is because the magnitude of the embeddings will be larger for longer sentences.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Distance function</th>
+<th>Values</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cosine similarity</td>
+<td>[-1, 1]</td>
+<td>When the magnitude is not important</td>
+</tr>
+<tr class="even">
+<td>Dot product</td>
+<td>[-inf, inf]</td>
+<td>When the magnitude is important</td>
+</tr>
+<tr class="odd">
+<td>Euclidean distance</td>
+<td>[0, inf]</td>
+<td>When the magnitude is important</td>
+</tr>
+</tbody>
+</table>
+<p>To recap:</p>
+<ul>
+<li><strong>Cosine similarity</strong> focuses on the angle between vectors. It’s a normalized dot product.</li>
+<li><strong>Dot product</strong> focused on both magnitude and angle.</li>
+<li><strong>Euclidean distance</strong> measures spatial distance between vectors.</li>
+</ul>
+<p>There are other distance functions, such as Manhattan distance, but these are common ones and useful for our use cases!</p>
+</section>
+</section>
+<section id="scaling-up" class="level2">
+<h2 class="anchored" data-anchor-id="scaling-up">Scaling Up</h2>
+<p>Until now we’ve been working with just a couple of sentences. In practice, you might have to deal with millions of embeddings, and we cannot always compute the distance to all of them (this is called brute-force search).</p>
+<p>One approach is to use an approximate nearest neighbor algorithm. These algorithms partition the data into buckets of similar embeddings. This allows us to quickly find the closest embeddings without having to compute the distance to all of them. This is not exact, as some vectors with high similarity might still be missed. There are different libraries you can use to do this, such as Spotify’s <a href="https://github.com/spotify/annoy">Annoy</a> and Facebook’s <a href="https://github.com/facebookresearch/faiss">Faiss</a>. Vector databases such as Pinecone and Weaviate also use nearest neighbor techniques to be able to search millions of objects in milliseconds.</p>
+<p>For now, let’s look at an interesting application where the scaling issues become more apparent.</p>
+<section id="application-2.-paraphrase-mining" class="level3">
+<h3 class="anchored" data-anchor-id="application-2.-paraphrase-mining">Application 2. Paraphrase Mining</h3>
+<p>Until now, with semantic search, we’ve been looking for the sentence most similar to a query sentence. In <strong>paraphrase mining</strong>, the goal is to find texts with similar meaning in a very large corpus. Let’s take our Quora dataset and see if we can find similar questions.</p>
+<div id="ce3865fd" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>questions_to_embed <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>short_corpus_questions <span class="op">=</span> corpus_questions[:questions_to_embed]</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>short_corpus_questions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>['',
+ 'What are the Nostradamus Predictions for the 2017?',
+ 'Is it expensive to take music lessons?',
+ 'what are the differences between first world and third world countries? Are there any second world countries?',
+ 'How much is a 1963 2 dollar bill with a red seal worth?',
+ 'What is the capital of Finland?',
+ 'Which is the best project management app for accounting companies?',
+ "What is Dire Straits' best album ever?",
+ 'How does Weapon Silencers work?',
+ 'How should we study in medical school?']</code></pre>
+</div>
+</div>
+<div id="e9eb9fd0" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb100"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SentenceTransformer(<span class="st">"quora-distilbert-multilingual"</span>)</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> model.encode(short_corpus_questions, convert_to_tensor<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute distance btween all embeddings</span></span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>start_time <span class="op">=</span> time.time()</span>
+<span id="cb100-6"><a href="#cb100-6" aria-hidden="true" tabindex="-1"></a>distances <span class="op">=</span> util.pytorch_cos_sim(embeddings, embeddings)</span>
+<span id="cb100-7"><a href="#cb100-7" aria-hidden="true" tabindex="-1"></a>end_time <span class="op">=</span> time.time()</span>
+<span id="cb100-8"><a href="#cb100-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb100-9"><a href="#cb100-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Results (after </span><span class="sc">{:.3f}</span><span class="st"> seconds):"</span>.<span class="bu">format</span>(end_time <span class="op">-</span> start_time))</span>
+<span id="cb100-10"><a href="#cb100-10" aria-hidden="true" tabindex="-1"></a>distances</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results (after 0.000 seconds):</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[1.0000, 0.7863, 0.6348, 0.7524, 0.7128, 0.7620, 0.6928, 0.7316, 0.6973,
+         0.6602],
+        [0.7863, 1.0000, 0.7001, 0.8369, 0.8229, 0.8093, 0.7694, 0.8111, 0.7849,
+         0.7157],
+        [0.6348, 0.7001, 1.0000, 0.6682, 0.7346, 0.7228, 0.7257, 0.7434, 0.7529,
+         0.7616],
+        [0.7524, 0.8369, 0.6682, 1.0000, 0.7484, 0.8042, 0.6713, 0.7560, 0.7336,
+         0.6901],
+        [0.7128, 0.8229, 0.7346, 0.7484, 1.0000, 0.7222, 0.7419, 0.7603, 0.8080,
+         0.7145],
+        [0.7620, 0.8093, 0.7228, 0.8042, 0.7222, 1.0000, 0.7327, 0.7542, 0.7349,
+         0.6992],
+        [0.6928, 0.7694, 0.7257, 0.6713, 0.7419, 0.7327, 1.0000, 0.7820, 0.7270,
+         0.7513],
+        [0.7316, 0.8111, 0.7434, 0.7560, 0.7603, 0.7542, 0.7820, 1.0000, 0.7432,
+         0.7151],
+        [0.6973, 0.7849, 0.7529, 0.7336, 0.8080, 0.7349, 0.7270, 0.7432, 1.0000,
+         0.7243],
+        [0.6602, 0.7157, 0.7616, 0.6901, 0.7145, 0.6992, 0.7513, 0.7151, 0.7243,
+         1.0000]], device='cuda:0')</code></pre>
+</div>
+</div>
+<p>Awesome! We just computed the distances of 10 embeddings vs 10 embeddings. It was quite fast. Let’s try now with 1000 queries.</p>
+<div id="c947ffb1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_embeddings_slow(questions, n<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a>    embeddings <span class="op">=</span> model.encode(</span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>        questions[:n], show_progress_bar<span class="op">=</span><span class="va">True</span>, convert_to_tensor<span class="op">=</span><span class="va">True</span></span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute distance btween all embeddings</span></span>
+<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a>    start_time <span class="op">=</span> time.time()</span>
+<span id="cb103-8"><a href="#cb103-8" aria-hidden="true" tabindex="-1"></a>    distances <span class="op">=</span> util.pytorch_cos_sim(embeddings, embeddings)</span>
+<span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a>    end_time <span class="op">=</span> time.time()</span>
+<span id="cb103-10"><a href="#cb103-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-11"><a href="#cb103-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> distances, end_time <span class="op">-</span> start_time</span>
+<span id="cb103-12"><a href="#cb103-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-13"><a href="#cb103-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-14"><a href="#cb103-14" aria-hidden="true" tabindex="-1"></a>_, s <span class="op">=</span> compute_embeddings_slow(corpus_questions, <span class="dv">20000</span>)</span>
+<span id="cb103-15"><a href="#cb103-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Results (after </span><span class="sc">{:.3f}</span><span class="st"> seconds):"</span>.<span class="bu">format</span>(s))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"90f929bf62b04c5180c9573320320d4e","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results (after 0.000 seconds):</code></pre>
+</div>
+</div>
+<p>Ok, that’s still fast! Let’s look at some other values</p>
+<div id="e27d651f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>n_queries <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">10001</span>, <span class="dv">20001</span>, <span class="dv">30001</span>]  <span class="co"># If I keep going my computer explodes</span></span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> []</span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> n_queries:</span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>    _, s <span class="op">=</span> compute_embeddings_slow(corpus_questions, n)</span>
+<span id="cb105-8"><a href="#cb105-8" aria-hidden="true" tabindex="-1"></a>    times.append(s)</span>
+<span id="cb105-9"><a href="#cb105-9" aria-hidden="true" tabindex="-1"></a>    torch.cuda.empty_cache()  <span class="co"># Clear GPU cache</span></span>
+<span id="cb105-10"><a href="#cb105-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-11"><a href="#cb105-11" aria-hidden="true" tabindex="-1"></a>plt.plot(n_queries, times)</span>
+<span id="cb105-12"><a href="#cb105-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Number of queries"</span>)</span>
+<span id="cb105-13"><a href="#cb105-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Time (seconds)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"bc00ef68a4dd45ec822cb736f62f0c6d","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"7ca7ff71b91f48aa9c5776803dabc406","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"e6de0384bb7e4c5eb497cc1d847f364d","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"1bcf39b41a744a2da167afeab7359ae7","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Text(0, 0.5, 'Time (seconds)')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-61-output-6.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The algorithm above has a quadratic runtime, so it won’t scale up well if we keep increasing the number of queries. For larger collections, we can use the <a href="https://www.sbert.net/examples/applications/paraphrase-mining/README.html">paraphrase mining technique</a>, which is more complex and efficient.</p>
+<div id="b28bb006" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb107"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>start_time <span class="op">=</span> time.time()</span>
+<span id="cb107-2"><a href="#cb107-2" aria-hidden="true" tabindex="-1"></a>paraphrases <span class="op">=</span> util.paraphrase_mining(</span>
+<span id="cb107-3"><a href="#cb107-3" aria-hidden="true" tabindex="-1"></a>    model, corpus_questions[:<span class="dv">100000</span>], show_progress_bar<span class="op">=</span><span class="va">True</span></span>
+<span id="cb107-4"><a href="#cb107-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb107-5"><a href="#cb107-5" aria-hidden="true" tabindex="-1"></a>end_time <span class="op">=</span> time.time()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"207c7cf4d03543b9ab3f5edc276cb7fd","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="0a994549" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(paraphrases)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>250976</code></pre>
+</div>
+</div>
+<div id="4015fd06" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>paraphrases[:<span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>[[0.999999463558197, 18862, 24292],
+ [0.9999779462814331, 10915, 61354],
+ [0.9999630451202393, 60527, 86890]]</code></pre>
+</div>
+</div>
+<p>The first value is the score, the second is the index of a corpus question, and the third is another index to a corpus question. The score indicates how similar the two questions are.</p>
+<p>Nice! We just 1. Computed the embeddings of 100,000 questions 2. Obtained the most similar sentences, and 3. Sorted them</p>
+<p>All of this in 20 seconds! Let’s look at the 5 matches with the highest similariy</p>
+<div id="592f7249" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb112"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> score, i, j <span class="kw">in</span> paraphrases[:<span class="dv">5</span>]:</span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="sc">{:.3f}</span><span class="ch">\t</span><span class="sc">{}</span><span class="st"> and </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(score, corpus_questions[i], corpus_questions[j]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1.000   How do I  increase traffic on my site? and How do I increase traffic on my site?
+1.000   who is the best rapper of all time? and Who is the best rapper of all time?
+1.000   How can I become an automobile engineer? and How can I become a automobile engineer?
+1.000   I made a plasma vortex at my home, but why doesn't it produce a zapping sound like at time when we see sparks and does the air nearby it ionizes? and I made a plasma vortex at my home, but why doesn't it produce a zapping sound like at time when we see sparks and does the air nearby it, ionizes?
+1.000   Why was Cyrus Mistry removed as the chairman of Tata Sons? and Why was Cyrus Mistry removed as the Chairman of Tata Sons?</code></pre>
+</div>
+</div>
+<p>How does this method work? The corpus is divided into smaller chunks, which allows us to manage the memory and compute usage. There are two ways in which the chunking happens:</p>
+<ul>
+<li><strong>Query Chunk Size:</strong> Determines how many sentences are considered as potential paraphrases. This is the number of sentences that are compared to the query sentence and controlled with <code>query_chunk_size</code> (5000 by default).</li>
+<li><strong>Corpus Chunk Size:</strong> Determines how many chunks of the corpus are being compared simultaneously. This is controlled with <code>corpus_chunk_size</code> (100000 by default).</li>
+</ul>
+<p>For example, with the default parameters, the algorithm processes 5000 sentences at a time, comparing each of these against chunks of 100000 sentences from the rest of the corpus. The algorithm is focused on getting the <strong>top matches</strong> - using <code>top_k</code>, for each sentence in a query chunk, the algorithm just selects the top k matches from the corpus chunk. This means that the algorithm will not find all the matches, but it will find the top matches. This is a good trade-off as we usually don’t need all the matches, but just the top ones.</p>
+<p>Both parameters make the process more efficient as it’s computationally easier to handle smaller subsets of the data. It also helps use less memory as we don’t have to load the entire corpus into memory to compute the similarity. Finding the right values for these parameters is a trade-off between speed and accuracy. The larger the values, the more accurate the results, but the slower the algorithm.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You can use <code>max_pairs</code> to limit the number of pairs returned.</p>
+</div>
+</div>
+<p>Here is some pseudocode of the algorithm:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb114"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize an empty list to store the results</span></span>
+<span id="cb114-2"><a href="#cb114-2" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb114-3"><a href="#cb114-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb114-4"><a href="#cb114-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> query_chunk <span class="kw">in</span> query_chunks:</span>
+<span id="cb114-5"><a href="#cb114-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> corpus_chunk <span class="kw">in</span> corpus_chunks:</span>
+<span id="cb114-6"><a href="#cb114-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute the similarity between the query chunk and the corpus chunk</span></span>
+<span id="cb114-7"><a href="#cb114-7" aria-hidden="true" tabindex="-1"></a>        similarity <span class="op">=</span> compute_similarity(query_chunk, corpus_chunk)</span>
+<span id="cb114-8"><a href="#cb114-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get the top k matches in the other chunk</span></span>
+<span id="cb114-9"><a href="#cb114-9" aria-hidden="true" tabindex="-1"></a>        top_k_matches <span class="op">=</span> similarity.top_k(top_k)</span>
+<span id="cb114-10"><a href="#cb114-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add the top k matches to the results</span></span>
+<span id="cb114-11"><a href="#cb114-11" aria-hidden="true" tabindex="-1"></a>        results.add(top_k_matches)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="selecting-and-evaluating-models" class="level2">
+<h2 class="anchored" data-anchor-id="selecting-and-evaluating-models">Selecting and evaluating models</h2>
+<p>You should have a pretty good understanding of sentence embeddings and what we can do with them. Today, we used two different models, <code>all-MiniLM-L6-v2</code> and <code>quora-distilbert-multilingual</code>. How do we know which one to use? How do we know if a model is good or not?</p>
+<p>The first step is to know where to discover sentence embedding models. If you’re using open-source ones, the Hugging Face Hub allows you to <a href="https://huggingface.co/models?library=sentence-transformers">filter for them</a>. The community has shared over 4000 models! Although looking at the trending models on Hugging Face is a good indicator (e.g., I can see the Microsoft Multilingual 5 Large model, a decent one), we need more information to pick a model.</p>
+<p><a href="https://huggingface.co/spaces/mteb/leaderboard">MTEB</a> has us covered. This leaderboard contains multiple evaluation datasets for various tasks. Let’s quickly look at some criteria we’re interested in when picking a model.</p>
+<ul>
+<li><strong>Sequence length.</strong> As discussed before, you might need to encode longer sequences depending on the expected user inputs. For example, if you’re encoding long documents, you might need to use a model with a larger sequence length. Another alternative is to split the document into multiple sentences and encode each sentence separately.</li>
+<li><strong>Language.</strong> The leaderboard contains mostly English or multilingual models, but you can also find models for other languages such as Chinese, Polish, Danish, Swedish, German, etc.</li>
+<li><strong>Embedding dimension.</strong> As discussed before, the larger the embedding dimension, the more information the embedding can capture. However, larger embeddings are more expensive to compute and store.</li>
+<li><strong>Average metrics across tasks.</strong> The leaderboard contains multiple tasks, such as clustering, re-ranking, and retrieval. You can look at the average performance across all tasks to get a sense of how good the model is.</li>
+<li><strong>Task-specific metrics.</strong> You can also look at the model’s performance in specific tasks. For example, if you’re interested in clustering, you can look at the model’s performance in the clustering task.</li>
+</ul>
+<p>Knowing the purpose of the model is also essential. Some models will be generalist models. Others, such as <a href="https://huggingface.co/allenai/specter2">Specter 2</a>, are focused on specific tasks, such as scientific papers. I won’t dive too much into all the tasks in the leaderboard, but you can look at the <a href="https://arxiv.org/abs/2210.07316">MTEB paper</a> for more information. Let me give a brief summary of MTEB.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://arxiv.org/abs/2210.07316"><img src="mteb.png" class="img-fluid figure-img"></a></p>
+<figcaption>MTEB tasks image from the paper</figcaption>
+</figure>
+</div>
+<p>MTEB provides a benchmark of 56 datasets across eight tasks and contains 112 languages. It’s easily extensible to add your datasets and models to the leaderboard. Overall, it’s a straightforward tool to find the suitable speed-accuracy trade-off for your use case.</p>
+<p>Today’s (Jan 7th, 2024) top model is a large model, E5-Mistral-7B-instruct, which is 14.22Gb in size and an average of 66.63 over the 56 datasets. One of the next best open-source models is BGE-Large-en-v1.5, which is just 1.34Gb and performs an average of 64.23. And the base model for BGE, which is even smaller (0.44Gb), has a quality of 63.55! As a comparison, text-embedding-ada-002, even if it provides larger embeddings of 1536 dimensions, performs with a quality of 60.99. That’s number 23 in the MTEB benchmark! Cohere provides better embeddings, with a quality of 64.47 and embeddings of 1024 dimensions.</p>
+<p>I recommend looking at this <a href="https://twitter.com/Nils_Reimers/status/1487014195568775173">Twitter thread from 2022</a>, in which OpenAI embeddings were compared against other embeddings. The results are quite interesting! The costs were many orders of magnitude higher, and the quality was considerably lower than smaller models.</p>
+<p><strong>All of this said, don’t overfixate on a single number. You should always look at the specific metrics of your task and the particular resource and speed requirements</strong></p>
+<p>It’s interesting to look at the different tasks covered in MTEB to understand potential sentence embedding applications better.</p>
+<ul>
+<li><strong>Bitext Mining.</strong> This task involves finding the most similar sentences in two sets of sentences, each in a different language. It is essential for machine translation and cross-lingual search.</li>
+<li><strong>Classification.</strong> In this application, a logistic regression classifier is trained using sentence embeddings for text classification tasks.</li>
+<li><strong>Clustering.</strong> Here, a k-means model is trained on sentence embeddings to group similar sentences together, useful in unsupervised learning tasks.</li>
+<li><strong>Pair Classification.</strong> This task entails predicting whether a pair of sentences are similar, such as determining if they are duplicates or paraphrases, aiding in paraphrase detection.</li>
+<li><strong>Re-ranking.</strong> In this scenario, a list of reference texts is re-ranked based on their similarity to a query sentence, improving search and recommendation systems.</li>
+<li><strong>Retrieval.</strong> This application involves embedding queries and associated documents to find the most similar documents to a given query, crucial in search-related tasks.</li>
+<li><strong>Semantic Similarity.</strong> This task focuses on determining the similarity between a pair of sentences, outputting a continuous similarity score, useful in paraphrase detection and related tasks.</li>
+<li><strong>Summarization.</strong> This involves scoring a set of summaries by computing the similarity between them and a reference (human-written) summary, important in summarization evaluation.</li>
+</ul>
+</section>
+<section id="showcase-application-real-time-embeddings-in-your-browser" class="level2">
+<h2 class="anchored" data-anchor-id="showcase-application-real-time-embeddings-in-your-browser">Showcase Application: Real-time Embeddings in your browser</h2>
+<p>We won’t do the hands-on for this one, but I wanted to show you a cool application of embeddings. Lee Butterman built a <a href="https://leebutterman.com/wikipedia-search-by-vibes/">cool app</a> where users can search among millions of Wikipedia articles by using embeddings. <strong>What is extra nice here is that this is offline: the embeddings are stored in the browser and the model is running directly in your browser as well - nothing is being sent to a server!</strong> 🤯</p>
+<p>Preparing the data</p>
+<ul>
+<li>We first pre-compute an embedding database. The author used a small yet effective model, all-minilm-l6-v2.</li>
+<li>The database of 6 million pages * 384 dimensions * 4 bytes per float = 9.2 GB. This is quite large to have users download that.</li>
+<li>The author used a technique called <a href="https://en.wikipedia.org/wiki/Vector_quantization">product quantization</a> to reduce the size of the database.</li>
+<li>The data is then exported to a format called Arrow, which is very compact!</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do not worry too much about the specifics here. Our main goal is to understand the high-level idea of this project; so don’t be scared if this is the first time you hear the word “quantization”!</p>
+</div>
+</div>
+<p>At inference time</p>
+<ul>
+<li>Lee used <a href="https://github.com/xenova/transformers.js">transformers.js</a>, a library that allows to run transformers models in the browser with JavaScript. This requires having quantized models. Here is an example</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb115"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> extractor <span class="op">=</span> <span class="cf">await</span> <span class="fu">pipeline</span>(<span class="st">'feature-extraction'</span><span class="op">,</span> <span class="st">'Xenova/all-MiniLM-L6-v2'</span>)<span class="op">;</span></span>
+<span id="cb115-2"><a href="#cb115-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> output <span class="op">=</span> <span class="cf">await</span> <span class="fu">extractor</span>(<span class="st">'This is a simple test.'</span><span class="op">,</span> { <span class="dt">pooling</span><span class="op">:</span> <span class="st">'mean'</span><span class="op">,</span> <span class="dt">normalize</span><span class="op">:</span> <span class="kw">true</span> })<span class="op">;</span></span>
+<span id="cb115-3"><a href="#cb115-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Tensor {</span></span>
+<span id="cb115-4"><a href="#cb115-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   type: 'float32',</span></span>
+<span id="cb115-5"><a href="#cb115-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   data: Float32Array [0.09094982594251633, -0.014774246141314507, ...],</span></span>
+<span id="cb115-6"><a href="#cb115-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   dims: [1, 384]</span></span>
+<span id="cb115-7"><a href="#cb115-7" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>transformers.js</code> downloads the all-MiniLM-L6-v2 model to the browser and is used to compute the embeddings in the browser.</li>
+<li>The distance is then computed using <a href="https://github.com/lsb/pq.js">pq.js</a>.</li>
+</ul>
+<p>Read more about this project in <a href="https://www.leebutterman.com/2023/06/01/offline-realtime-embedding-search.html">Lee’s blog post</a>.This is a great example of how embeddings can be used in the browser!</p>
+</section>
+<section id="the-state-of-the-ecosystem" class="level2">
+<h2 class="anchored" data-anchor-id="the-state-of-the-ecosystem">The State of the Ecosystem</h2>
+<p>The ecosystem around embeddings is quite large.</p>
+<section id="building-on-top-of-embeddings" class="level3">
+<h3 class="anchored" data-anchor-id="building-on-top-of-embeddings">Building on top of embeddings:</h3>
+<ul>
+<li>There are cool tools such as <code>top2vec</code> and <code>bertopic</code> designed for buildimg topic embeddings.</li>
+<li><code>keybert</code> is a library that allows extracting keywords and keyphrases similar to a document using BERT embeddings.</li>
+<li><code>setfit</code> is a library that allows doing efficient few-shot fine-tuning of Sentence Transformers to use them for text classification.</li>
+</ul>
+</section>
+<section id="embedding-databases" class="level3">
+<h3 class="anchored" data-anchor-id="embedding-databases">Embedding databases</h3>
+<p>2023 has been the year of embedding databases. <a href="https://integrations.langchain.com/vectorstores">LangChain Integrations Section</a> show 65 vector stores. From Weaviate, Pinecone, and Chroma to Redis, ElasticSearch, and Postgres. Embedding databases are specialized to accelerate similarity search on embeddings, usually using approximate search algorithms. The new wave of embedding database startups has lead to a big amount of money being invested in it. At the same time, classical existing database companies have integrated vector indexes into their products, such as Cassandra and MongoDB.</p>
+</section>
+<section id="research" class="level3">
+<h3 class="anchored" data-anchor-id="research">Research</h3>
+<p>The research around embeddings is also quite active. If you follow the MTEB benchmark, it changes every few weeks. Some of the players in this are are Microsoft (E5 models), Cohere, BAAI (BGE), Alibaba (GTE), NLP Group of The University of Hong Kong (Instructor), and Jina, among many others.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>What a journey! We just went from 0 to 1 in sentence embeddings. We learned about what they are, how to compute them, how to compare them, and how to scale them. We also saw some cool applications of embeddings, such as semantic search and paraphrase mining. I hope this blog post gave you a good understanding of what sentence embeddings are and how to use them. This is the first part of a series. What’s left to learn?</p>
+<ul>
+<li>The role of vector databases</li>
+<li>How to use embeddings for more complex ranking systems</li>
+<li>Topic modeling</li>
+<li>Multimodality</li>
+<li>How to train your own embedding models</li>
+<li>All about RAGs</li>
+</ul>
+<p>There will be a time for each of those! For now, I suggest to take a break to check your knowledge. Don’t hesitate to change the code and play with it! If you like this blog post, don’t hesitate to <a href="https://github.com/osanseviero/hackerllama">leave a GitHub Star</a> or share it!</p>
+</section>
+<section id="knowledge-check" class="level2">
+<h2 class="anchored" data-anchor-id="knowledge-check">Knowledge Check</h2>
+<ol type="1">
+<li>What make transformer models more useful than GloVe or Word2Vec for computing embeddings?</li>
+<li>What is the role of the <code>[CLS]</code> token in BERT and how does it help for computing sentence embeddings?</li>
+<li>What’s the difference between <code>pooler_output</code> and the <code>[CLS]</code> token embedding?</li>
+<li>What’s the difference between <code>[CLS]</code> pooling, max pooling, and mean pooling?</li>
+<li>What is the sequence length limitation of transformer models and how can we work around it?</li>
+<li>When do we need to normalize the embeddings?</li>
+<li>Which two vectors would give a cosine similarity of -1? What about 0?</li>
+<li>Explain the different parameters of the <code>paraphrase_mining</code> function.</li>
+<li>How would you choose the best model for your use case?</li>
+</ol>
+</section>
+<section id="resources" class="level2">
+<h2 class="anchored" data-anchor-id="resources">Resources</h2>
+<p>Here are some useful resources:</p>
+<ul>
+<li><a href="https://www.sbert.net/">Sentence Transformers</a></li>
+<li><a href="https://huggingface.co/models?library=sentence-transformers">Hugging Face Hub</a></li>
+<li><a href="https://huggingface.co/blog/mteb">MTEB Leaderboard</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/osanseviero\.github\.io\/hackerllama");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="osanseviero/hackerllama" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/osanseviero/hackerllama/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
