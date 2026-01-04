@@ -7,28 +7,30 @@ image: hacker.png
 
 **Hi there!** I'm Omar, and I **Lead Developer Experience at Google DeepMind**.
 
-I work at the intersection of Product, Engineering, Research, and Community, leading a global team dedicated to empowering developers to build the next generation of AI-powered applications.
+I work at the intersection of Product, Engineering, Research, and Community, leading a global team dedicated to empowering developers to build the next generation of AI-powered products.
 
-In this website, I write about Machine Learning and Open Source. 🤗 Check out the [Blog](/blog/) section!
+In this website, I write about Machine Learning, Open Source, and developers tools! 🤗 Check out the [Blog](/blog/) section!
 
 ![](profile.jpeg)
 
 ### Currently: Leading Developer Experience at Google DeepMind
 
-Our mission is to empower developers to build with AI by providing the leading developer experience for Google DeepMind’s AI products, including AI Studio, the Gemini API, and Gemma.
+Our mission is to empower developers to build with AI by providing a great developer experience for Google DeepMind’s AI products, including AI Studio, the Gemini API, and Gemma.
 
-As the Developer Experience Lead, I drive developer success and product adoption by ensuring our AI developer products are intuitive, powerful, and easy to build with. My work involves:
+As the Developer Experience Lead, I drive developer success and product adoption by ensuring our developer products are intuitive, powerful, and easy to build with. My work involves:
 
-* **Strategic Integration**: Partnering with developers' favorite tools and platforms to ensure seamless AI integration.
+* **Strategic Integration**: Partnering with developers' favorite tools and platforms to ensure seamless integration.
 * **Developer Advocacy & Empathy**: Influencing product roadmaps, leading educational initiatives, and crafting world-class documentation based on deep developer empathy.
-* **End-to-End Lifecycle**: My team is involved from early technical designs and feature ideation to successful global launches and continuous iteration.
-* **Model Launches**: Leading the developer experience and launches for major models including **Gemini**, **Gemma**, and **Nano Banana**.
+* **End-to-End Lifecycle**: My team is involved from early technical designs and feature ideation to successful launches and continuous iteration.
+* **Model Launches**: Leading the developer experience and launches for major models including **Gemini 3**, **Gemma**, and **Nano Banana**.
+
+Open ML has a big place in my heart, and hence I'm very involved in GDM open model efforts, such as MedGemma, EmbeddingGemma, and more.
 
 ### Career Highlights
 
 #### **Hugging Face** | *Chief Llama Officer* / Head of Platform and Community (Previously)
 
-I spent several years at the heart of the open-source AI revolution. I led multidisciplinary teams and open-source collaborations that shaped the ecosystem.
+I spent several years at the heart of the open ML revolution. I led multidisciplinary teams and open-source collaborations that shaped the ecosystem.
 
 * Launched [Hugging Face Spaces](http://hf.co/spaces), scaling from 500 to over 400k community-built demos.
 * Built key partnerships with labs (Meta, Google, etc.) and open-source communities and established technical integrations with libraries like spaCy and Sentence Transformers.
@@ -44,4 +46,4 @@ Built ML models and infrastructure for **Google Assistant** and served as a 20% 
 🇨🇭 Currently based in **Zurich**.
 🌎 Lived in Mexico, Peru, and Panama. Internships in Seattle and Mountain View.
 
-Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/omarsanseviero/), follow me on [Twitter](https://twitter.com/osanseviero), or reach out at osanseviero at gmail.com.
+Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/omarsanseviero/), follow me on [Twitter](https://twitter.com/osanseviero), or reach out at hackerllama at google.com.

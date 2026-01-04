@@ -5,7 +5,7 @@ title: "Resources & Engagements"
 ### Publications & Books
 
 #### [**Hands-on Generative AI with Transformers and Diffusion Models**](https://www.oreilly.com/library/view/hands-on-generative-ai/9781098149239/) (O'Reilly Media, 2024)
-*My book on building real-world Generative AI applications using the latest Transformers and Diffusion models. A practical guide for developers and researchers.*
+*Our book on building real-world Generative AI applications using the latest Transformers and Diffusion models. A practical guide for developers and researchers.*
 
 #### Selected Papers
 I have co-authored several papers at the intersection of alignment, dataset creation, and evaluation. You can find a full list on [Google Scholar](https://scholar.google.com/citations?hl=en&user=1CHq4KcAAAAJ).
@@ -19,10 +19,10 @@ I have co-authored several papers at the intersection of alignment, dataset crea
 
 ### Speaking & Community
 
-I am passionate about sharing knowledge and have delivered **over 100 talks and workshops** globally. My sessions cover topics such as **Open Source Machine Learning**, **Large Language Models (LLMs)**, **Generative AI**, and **Hacker-centric Product Development**.
+I am passionate about sharing knowledge and have delivered over 200 talks and workshops. My sessions cover topics such as Open Source Machine Learning, Large Language Models (LLMs), Generative AI, and Developer Tools in the AI era.
 
 #### Featured Engagements
-* **Google I/O & Google Cloud Next**: Showcasing the future of AI development and Developer Experience.
+* **Google I/O & Google Cloud Next**: Lead multiple workstreams at key Google events.
 * **Paris ICCV Meetup**: Organized a community event for **2000+ people** in the heart of Paris.
 * **Global Conferences**: Keynotes and workshops at **EuroPython**, **T3chFest**, **DataFest Armenia**, and various **PyCons** (Chile, Argentina, Sweden, South Africa).
 * **Academic & Industry Guest Talks**: Sessions at **Columbia University**, **ETH Zurich**, **IBM Research**, and **UZH**.
@@ -33,8 +33,8 @@ I am passionate about sharing knowledge and have delivered **over 100 talks and 
 
 * **Scale**: Helped grow Hugging Face from 20k repos to **over 1 million repositories**.
 * **Community Leadership**: Launched the Hugging Face Discord Server and scaled the community to hundreds of thousands of members.
-* **Product Adoption**: Spearheaded the release of **Hugging Face Spaces**, enabling the creation of over **400k community demos**.
-* **Strategic Partnerships**: Led major collaborations with **Meta**, **Google**, **NASA**, and **IBM** for foundational model releases (Llama 2, Mixtral, Falcon 180, etc.).
+* **Product Adoption**: Spearheaded the release of Hugging Face Spaces, enabling the creation of over **400k community demos**.
+* **Strategic Partnerships**: Led major collaborations with Meta, Google, NASA, and IBM for foundational model releases (Llama 2, Mixtral, Falcon 180, etc.).
 * **Educational Reach**: Partnered with Andrew Ng's DeepLearning.AI to launch high-impact ML courses.
 
 ---
@@ -42,6 +42,7 @@ I am passionate about sharing knowledge and have delivered **over 100 talks and 
 ### Previous Teaching (2017–2018)
 
 Before moving fully into industry leadership, I taught several academic and professional courses:
+
 * **Machine Learning for economists** (Mexico City)
 * **Practical Deep Learning** (ITESM / Tecnológico de Monterrey)
 * **Immersive Web Development** (Mexico City)
